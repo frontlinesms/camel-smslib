@@ -16,4 +16,8 @@ public class SmslibService {
 		users.add(user);
 	}
 
+	public void stopFor(SmslibServiceUser user) {
+		users.remove(user);
+	}
+
 }

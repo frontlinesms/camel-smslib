@@ -8,7 +8,6 @@ import org.apache.camel.impl.DefaultProducer;
 
 /**
  * @author Alex Anderson
- *
  */
 public class SmslibProducer extends DefaultProducer implements SmslibServiceUser {
 	private final SmslibService smslibService;
@@ -27,5 +26,11 @@ public class SmslibProducer extends DefaultProducer implements SmslibServiceUser
 	protected void doStart() throws Exception {
 		this.smslibService.startFor(this);
 		super.doStart();
+	}
+	
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		this.smslibService.stopFor(this);
 	}
 }

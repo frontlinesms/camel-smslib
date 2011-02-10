@@ -23,4 +23,10 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceUser
 		this.smslibService.startFor(this);
 		super.doStart();
 	}
+	
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		this.smslibService.stopFor(this);
+	}
 }

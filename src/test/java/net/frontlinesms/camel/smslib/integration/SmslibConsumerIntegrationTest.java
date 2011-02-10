@@ -19,7 +19,7 @@ public class SmslibConsumerIntegrationTest {
 		SmslibEndpoint mockEndpoint = mock(SmslibEndpoint.class);
 		SmslibService mockSmslibService = mock(SmslibService.class);
 		
-		SmslibConsumer c = new SmslibConsumer(mockEndpoint , mockSmslibService  , mockProcessor );
+		SmslibConsumer c = new SmslibConsumer(mockEndpoint, mockSmslibService, mockProcessor);
 		
 		Exchange exchange = mock(Exchange.class);
 		c.getAsyncProcessor().process(exchange);
