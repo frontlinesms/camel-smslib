@@ -33,6 +33,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.frontlinesms.core</groupId>
+      <artifactId>smslib</artifactId>
+      <version>1.0.3</version>
+    </dependency>
 
     <!-- testing -->
     <dependency>
