@@ -5,11 +5,8 @@ package net.frontlinesms.camel.smslib;
 
 import static org.junit.Assert.*;
 
-import java.util.Map;
-
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultComponent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,19 +30,26 @@ public class SmslibComponentTest {
 	
 	@Test
 	public void testCreateSerialEndpoint() throws Exception {
-		Endpoint e = component.createEndpoint("smslib://serial/COM5");
+		Endpoint e = component.createEndpoint("smslib://serial/COM5?direction=send&options=a,b,c");
 		assertTrue(e instanceof SmslibSerialEndpoint);
 	}
 	
 	@Test
 	public void testCreateHttpEndpoint() throws Exception {
-		Endpoint e = component.createEndpoint("smslib://http/Clickatell");
+		Endpoint e = component.createEndpoint("smslib://http/provider/username?direction=receive&options=a,b,c");
 		assertTrue(e instanceof SmslibHttpEndpoint);
+	}
+
+	@Test
+	public void testCreateMultipleEndpointsWithSameDetails() throws Exception {
+		Endpoint send = component.createEndpoint("smslib://http/provider/username?direction=receive&options=a,b,c");
+		Endpoint receive = component.createEndpoint("smslib://http/provider/username?direction=send&options=a,b,c");
+		assertTrue(send == receive);
 	}
 	
 	public void testCreateBadEndpoint() throws Exception {
 		try {
-			component.createEndpoint("smslib://whatever");
+			component.createEndpoint("smslib://whatever?options=a,b,c");
 			fail();
 		} catch(RuntimeException ex) {
 			// expected this exception
