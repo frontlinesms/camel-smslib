@@ -2,6 +2,7 @@ package net.frontlinesms.camel.smslib;
 
 import static org.mockito.Mockito.*;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.junit.After;
 import org.junit.Before;
@@ -31,13 +32,33 @@ public class SmslibConsumerTest {
 	
 	@Test
 	public void testDoStartShouldStartService() throws Exception {
+		// when
 		c.doStart();
+
+		// then
 		verify(mockSmslibService).startFor(c);
 	}
 	
 	@Test
 	public void testDoStopShouldStopService() throws Exception {
+		// when
 		c.stop();
+		
+		// then
 		verify(mockSmslibService).stopFor(c);
+	}
+	
+	@Test
+	public void testAccept() throws Exception {
+		// given
+		SmslibCamelMessage message = mock(SmslibCamelMessage.class);
+		Exchange exchange = mock(Exchange.class);
+		
+		// when
+		c.accept(message);
+		
+		// then
+		verify(exchange).setIn(message);
+		verify(mockProcessor).process(exchange);
 	}
 }

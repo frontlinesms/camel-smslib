@@ -3,6 +3,7 @@
  */
 package net.frontlinesms.camel.smslib;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
 
@@ -28,5 +29,17 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceUser
 	public void stop() throws Exception {
 		super.stop();
 		this.smslibService.stopFor(this);
+	}
+	
+	public void accept(SmslibCamelMessage message) {
+		Exchange exchange = getEndpoint().createExchange();
+		exchange.setIn(message);
+		Processor processor = this.getProcessor();
+		
+		try {
+			processor.process(exchange);
+		} catch(Exception e) {
+			getExceptionHandler().handleException("Exception thrown when calling processor.process()", exchange, e);
+		}
 	}
 }
