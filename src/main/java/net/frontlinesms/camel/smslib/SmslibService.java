@@ -20,4 +20,7 @@ public class SmslibService {
 		users.remove(user);
 	}
 
+	public void send(SmslibCamelMessage message) {
+		// TODO Auto-generated method stub
+	}
 }

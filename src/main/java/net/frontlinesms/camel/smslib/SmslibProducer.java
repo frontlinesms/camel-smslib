@@ -4,6 +4,7 @@
 package net.frontlinesms.camel.smslib;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 
 /**
@@ -19,7 +20,9 @@ public class SmslibProducer extends DefaultProducer implements SmslibServiceUser
 
 	/** @see Processor#process(Exchange) */
 	public void process(Exchange exchange) throws Exception {
-		// TODO Auto-generated method stub
+		Message in = exchange.getIn();
+		assert(in instanceof SmslibCamelMessage);
+		this.smslibService.send((SmslibCamelMessage) in);
 	}
 	
 	@Override
