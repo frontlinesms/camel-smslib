@@ -5,19 +5,28 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.smslib.CService;
+
 public class SmslibService {
+	private final CService cService;
 	private final Set<SmslibServiceUser> users = Collections.synchronizedSet(new HashSet<SmslibServiceUser>());
 
-	public SmslibService(String uri, String remaining, Map<String, Object> parameters) {
-		// TODO Auto-generated constructor stub
+	public SmslibService(CServiceFactory cServiceFactory, String uri, String remaining, Map<String, Object> parameters) {
+		this.cService = cServiceFactory.create(uri, remaining, parameters);
 	}
 
-	public void startFor(SmslibServiceUser user) {
+	public void startFor(SmslibServiceUser user) throws Exception {
 		users.add(user);
+		
+		cService.connect();
 	}
 
-	public void stopFor(SmslibServiceUser user) {
+	public void stopFor(SmslibServiceUser user) throws Exception {
 		users.remove(user);
+		
+		if(cService.isConnected() && users.isEmpty()) {
+			cService.disconnect();
+		}
 	}
 
 	public void send(SmslibCamelMessage message) {

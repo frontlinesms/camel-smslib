@@ -11,7 +11,6 @@ import org.junit.Test;
 
 public class SmslibEndpointIntegrationTest {
 	private CamelContext context;
-	private SmslibComponent component;
 	
 	@Before
 	public void setUp() {

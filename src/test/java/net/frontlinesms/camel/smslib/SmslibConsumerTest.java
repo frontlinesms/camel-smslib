@@ -53,6 +53,7 @@ public class SmslibConsumerTest {
 		// given
 		SmslibCamelMessage message = mock(SmslibCamelMessage.class);
 		Exchange exchange = mock(Exchange.class);
+		when(mockEndpoint.createExchange()).thenReturn(exchange);
 		
 		// when
 		c.accept(message);

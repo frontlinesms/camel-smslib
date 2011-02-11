@@ -16,7 +16,7 @@ public class SmslibEndpoint extends DefaultEndpoint {
 	
 	SmslibEndpoint(String uri, String remaining, Map<String, Object> parameters) {
 		super(uri);
-		smslibService = new SmslibService(uri, remaining, parameters);
+		smslibService = new SmslibService(new CServiceFactory(), uri, remaining, parameters);
 	}
 
 	public SmslibConsumer createConsumer(Processor processor) throws Exception {

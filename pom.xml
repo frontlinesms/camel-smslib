@@ -41,13 +41,19 @@
     <dependency>
       <groupId>net.frontlinesms.core</groupId>
       <artifactId>serial</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.frontlinesms.core</groupId>
+      <artifactId>serial-test</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
