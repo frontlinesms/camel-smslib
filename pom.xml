@@ -38,6 +38,11 @@
       <artifactId>smslib</artifactId>
       <version>1.0.3</version>
     </dependency>
+    <dependency>
+      <groupId>net.frontlinesms.core</groupId>
+      <artifactId>serial</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+    </dependency>
 
     <!-- testing -->
     <dependency>
