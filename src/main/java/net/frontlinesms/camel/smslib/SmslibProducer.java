@@ -10,7 +10,7 @@ import org.apache.camel.impl.DefaultProducer;
 /**
  * @author Alex Anderson
  */
-public class SmslibProducer extends DefaultProducer implements SmslibServiceUser {
+class SmslibProducer extends DefaultProducer implements SmslibServiceProducer {
 	private final SmslibService smslibService;
 	
 	public SmslibProducer(SmslibEndpoint endpoint, SmslibService smslibService) {
@@ -27,13 +27,13 @@ public class SmslibProducer extends DefaultProducer implements SmslibServiceUser
 	
 	@Override
 	protected void doStart() throws Exception {
-		this.smslibService.startFor(this);
+		this.smslibService.startForProducer();
 		super.doStart();
 	}
 	
 	@Override
 	public void stop() throws Exception {
 		super.stop();
-		this.smslibService.stopFor(this);
+		this.smslibService.stopForProducer();
 	}
 }

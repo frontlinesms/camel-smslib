@@ -11,7 +11,7 @@ import org.apache.camel.impl.DefaultConsumer;
  * @author aga
  *
  */
-public class SmslibConsumer extends DefaultConsumer implements SmslibServiceUser {
+public class SmslibConsumer extends DefaultConsumer implements SmslibServiceProducer {
 	private final SmslibService smslibService;
 	
 	public SmslibConsumer(SmslibEndpoint endpoint, SmslibService smslibService, Processor processor) {
@@ -21,14 +21,14 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceUser
 	
 	@Override
 	protected void doStart() throws Exception {
-		this.smslibService.startFor(this);
+		this.smslibService.startForConsumer();
 		super.doStart();
 	}
 	
 	@Override
 	public void stop() throws Exception {
 		super.stop();
-		this.smslibService.stopFor(this);
+		this.smslibService.stopForConsumer();
 	}
 	
 	public void accept(SmslibCamelMessage message) {

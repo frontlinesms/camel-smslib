@@ -30,13 +30,13 @@ public class SmslibProducerTest {
 	@Test
 	public void testDoStartShouldStartService() throws Exception {
 		p.doStart();
-		verify(mockSmslibService).startFor(p);
+		verify(mockSmslibService).startForProducer();
 	}
 	
 	@Test
 	public void testDoStopShouldStopService() throws Exception {
 		p.stop();
-		verify(mockSmslibService).stopFor(p);
+		verify(mockSmslibService).stopForProducer();
 	}
 	
 	@Test

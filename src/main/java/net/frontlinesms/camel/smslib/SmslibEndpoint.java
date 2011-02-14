@@ -20,11 +20,16 @@ public class SmslibEndpoint extends DefaultEndpoint {
 	}
 
 	public SmslibConsumer createConsumer(Processor processor) throws Exception {
-		return new SmslibConsumer(this, smslibService, processor);
+		SmslibConsumer consumer = new SmslibConsumer(this, smslibService, processor);
+		smslibService.setConsumer(consumer);
+		return consumer;
+		
 	}
 
 	public SmslibProducer createProducer() throws Exception {
-		return new SmslibProducer(this, smslibService);
+		SmslibProducer producer = new SmslibProducer(this, smslibService);
+		smslibService.setProducer(producer);
+		return producer;
 	}
 
 	public boolean isSingleton() {

@@ -1,12 +1,18 @@
 package net.frontlinesms.camel.smslib;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 import org.smslib.CService;
+import org.smslib.CService.MessageClass;
 
 import serial.mock.MockSerial;
 import serial.mock.NoSuchPortException;
@@ -19,6 +25,7 @@ public class SmslibServiceTest {
 	CService cServiceMock;
 	CServiceFactory cServiceFactory;
 	SmslibMessageTranslator translator;
+	Log logMock;
 
 	Map<String, Object> parameters;
 	String remaining;
@@ -43,6 +50,9 @@ public class SmslibServiceTest {
 
 		translator = mock(SmslibMessageTranslator.class);
 		service.setTranslator(translator);
+		
+		logMock = mock(Log.class);
+		service.setLog(logMock);
 	}
 	
 	@Test
@@ -53,10 +63,11 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceStart() throws Exception {
 		// given
-		SmslibServiceUser mockUser = mock(SmslibServiceUser.class);
+		SmslibProducer mockProducer = mock(SmslibProducer.class);
+		service.setProducer(mockProducer);
 		
 		// when
-		service.startFor(mockUser);
+		service.startForProducer();
 		
 		// then
 		verify(cServiceMock).connect();
@@ -65,11 +76,12 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceNoStartIfAlreadyStarted() throws Exception {
 		// given
-		SmslibServiceUser mockUser = mock(SmslibServiceUser.class);
+		SmslibProducer mockProducer = mock(SmslibProducer.class);
+		service.setProducer(mockProducer);
 		when(cServiceMock.isConnected()).thenReturn(true); // TODO this assumes that CService.isConnected() returns true while TRYING to conenct...
 		
 		// when
-		service.startFor(mockUser);
+		service.startForProducer();
 		
 		// then
 		verify(cServiceMock).connect();
@@ -78,11 +90,11 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceStop() throws Exception {
 		// given
-		SmslibServiceUser mockUser = mock(SmslibServiceUser.class);
+		service.setProducer(mock(SmslibProducer.class));
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
-		service.stopFor(mockUser);
+		service.stopForProducer();
 		
 		// verify
 		verify(cServiceMock).disconnect();
@@ -91,10 +103,10 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceNoStopIfNotStarted() throws Exception {
 		// given
-		SmslibServiceUser mockUser = mock(SmslibServiceUser.class);
+		service.setProducer(mock(SmslibProducer.class));
 		
 		// when
-		service.stopFor(mockUser);
+		service.stopForProducer();
 		
 		// verify
 		verify(cServiceMock, never()).disconnect();
@@ -103,14 +115,14 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceNoStopIfOtherUsers() throws Exception {
 		// given
-		SmslibServiceUser mockUser1 = mock(SmslibServiceUser.class);
-		service.startFor(mockUser1);
-		SmslibServiceUser mockUser2 = mock(SmslibServiceUser.class);
-		service.startFor(mockUser2);
+		service.setProducer(mock(SmslibProducer.class));
+		service.startForProducer();
+		service.setConsumer(mock(SmslibConsumer.class));
+		service.startForConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
-		service.stopFor(mockUser1);
+		service.stopForProducer();
 		
 		// verify
 		verify(cServiceMock, never()).disconnect();
@@ -119,21 +131,51 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceStopIfNoMoreUsers() throws Exception {
 		// given
-		SmslibServiceUser mockUser1 = mock(SmslibServiceUser.class);
-		service.startFor(mockUser1);
-		SmslibServiceUser mockUser2 = mock(SmslibServiceUser.class);
-		service.startFor(mockUser2);
+		SmslibProducer mockProducer = mock(SmslibProducer.class);
+		service.setProducer(mockProducer);
+		service.startForProducer();
+		SmslibConsumer mockConsumer = mock(SmslibConsumer.class);
+		service.setConsumer(mockConsumer);
+		service.startForConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
-		service.stopFor(mockUser1);
+		service.stopForProducer();
 		verify(cServiceMock, never()).disconnect();
 		
 		// and
-		service.stopFor(mockUser2);
+		service.stopForConsumer();
 		
 		// verify
 		verify(cServiceMock).disconnect();
+	}
+	
+	@Test
+	public void testMaxOneProducer() throws Exception {
+		// given
+		service.setProducer(mock(SmslibProducer.class));
+		
+		// when then
+		try {
+			service.setProducer(mock(SmslibProducer.class));
+			fail("Should not be able to start for more than one producer.");
+		} catch(SmslibServiceException ex) {
+			// expected
+		}
+	}
+	
+	@Test
+	public void testMaxOneConsumer() throws Exception {
+		// given
+		service.setConsumer(mock(SmslibConsumer.class));
+		
+		// when then
+		try {
+			service.setConsumer(mock(SmslibConsumer.class));
+			fail("Should not be able to start for more than one producer.");
+		} catch(SmslibServiceException ex) {
+			// expected
+		}
 	}
 	
 	@Test
@@ -200,7 +242,55 @@ public class SmslibServiceTest {
 	}
 	
 	@Test
-	public void testReceive() {
-		throw new RuntimeException("This test has not been written yet... looks like the consumer hasn't been either.");
+	@SuppressWarnings("unchecked")
+	public void testReceive() throws Exception {
+		// given
+		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
+		service.setConsumer(consumerMock);
+		service.startForConsumer();
+		doAnswer(new Answer() {
+			public Object answer(InvocationOnMock inv) {
+				LinkedList<CIncomingMessage> messageList =
+						(LinkedList<CIncomingMessage>) inv.getArguments()[0];
+				for(int i=0; i<3; ++i) messageList.add(mock(CIncomingMessage.class));
+				return null;
+			}
+		}).when(cServiceMock).readMessages(any(LinkedList.class), eq(MessageClass.UNREAD));
+		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
+		when(translator.translateIncoming(any(CIncomingMessage.class))).thenReturn(camelMessage);
+		
+		// when
+		service.doReceive();
+		
+		// then
+		verify(consumerMock, times(3)).accept(any(SmslibCamelMessage.class));
+	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testReceiveWithOneBadMessage() throws Exception {
+		// given
+		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
+		service.setConsumer(consumerMock);
+		service.startForConsumer();
+		final CIncomingMessage badMessage = mock(CIncomingMessage.class);
+		doAnswer(new Answer() {
+			public Object answer(InvocationOnMock inv) {
+				LinkedList<CIncomingMessage> messageList =
+						(LinkedList<CIncomingMessage>) inv.getArguments()[0];
+				messageList.add(badMessage);
+				for(int i=0; i<3; ++i) messageList.add(mock(CIncomingMessage.class));
+				return null;
+			}
+		}).when(cServiceMock).readMessages(any(LinkedList.class), eq(MessageClass.UNREAD));
+		TranslateException translateException = new TranslateException();
+		when(translator.translateIncoming(badMessage)).thenThrow(translateException);
+		
+		// when
+		service.doReceive();
+		
+		// then
+		verify(logMock).warn(translateException);
+		verify(consumerMock, times(3)).accept(any(SmslibCamelMessage.class));
 	}
 }

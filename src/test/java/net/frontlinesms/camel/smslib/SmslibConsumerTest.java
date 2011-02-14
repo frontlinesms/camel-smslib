@@ -36,7 +36,7 @@ public class SmslibConsumerTest {
 		c.doStart();
 
 		// then
-		verify(mockSmslibService).startFor(c);
+		verify(mockSmslibService).startForConsumer();
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class SmslibConsumerTest {
 		c.stop();
 		
 		// then
-		verify(mockSmslibService).stopFor(c);
+		verify(mockSmslibService).stopForConsumer();
 	}
 	
 	@Test

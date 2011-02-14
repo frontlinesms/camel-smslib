@@ -1,9 +1,15 @@
 package net.frontlinesms.camel.smslib;
 
+import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 
-public class SmslibMessageTranslator {
-	public COutgoingMessage translateOutgoing(SmslibCamelMessage smslibCamelMessageMock) throws TranslateException {
+class SmslibMessageTranslator {
+	public COutgoingMessage translateOutgoing(SmslibCamelMessage message) throws TranslateException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public SmslibCamelMessage translateIncoming(CIncomingMessage message) throws TranslateException {
 		// TODO Auto-generated method stub
 		return null;
 	}

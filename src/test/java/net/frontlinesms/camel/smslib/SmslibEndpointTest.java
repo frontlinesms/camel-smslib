@@ -52,7 +52,7 @@ public class SmslibEndpointTest {
 	}
 	
 	@Test
-	public void testCreateProducer() throws Exception {
+	public void testCreateConsumer() throws Exception {
 		// given
 		SmslibConsumer mockConsumer = mock(SmslibConsumer.class);
 		Processor mockProcessor = mock(Processor.class);
@@ -68,7 +68,7 @@ public class SmslibEndpointTest {
 	}
 	
 	@Test
-	public void testCreateConsumer() throws Exception {
+	public void testCreateProducer() throws Exception {
 		// given
 		SmslibProducer mockProducer = mock(SmslibProducer.class);
 		whenNew(SmslibProducer.class)
@@ -80,5 +80,10 @@ public class SmslibEndpointTest {
 		
 		// then
 		assertSame(mockProducer, p);
+	}
+	
+	@Test
+	public void testPropertiesAreLenient() {
+		assertTrue(endpoint.isLenientProperties());
 	}
 }
