@@ -1,7 +1,6 @@
 package net.frontlinesms.camel.smslib.integration;
 
 import static org.junit.Assert.*;
-import net.frontlinesms.camel.smslib.SmslibComponent;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
