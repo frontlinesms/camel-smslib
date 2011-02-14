@@ -3,20 +3,22 @@ package net.frontlinesms.camel.smslib;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.smslib.COutgoingMessage;
 import org.smslib.CService;
 
 import serial.mock.MockSerial;
 import serial.mock.NoSuchPortException;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /** Unit test for {@link SmslibService} */
 public class SmslibServiceTest {
 	CService cServiceMock;
 	CServiceFactory cServiceFactory;
+	SmslibMessageTranslator translator;
 
 	Map<String, Object> parameters;
 	String remaining;
@@ -37,12 +39,10 @@ public class SmslibServiceTest {
 		cServiceFactory = mock(CServiceFactory.class);
 		when(cServiceFactory.create(uri, remaining, parameters)).thenReturn(cServiceMock);
 		
-		service = new SmslibService(cServiceFactory, uri, remaining, parameters);	
-	}
+		service = new SmslibService(cServiceFactory, uri, remaining, parameters);
 
-	@After
-	public void tearDown() {
-		service = null;
+		translator = mock(SmslibMessageTranslator.class);
+		service.setTranslator(translator);
 	}
 	
 	@Test
@@ -134,5 +134,73 @@ public class SmslibServiceTest {
 		
 		// verify
 		verify(cServiceMock).disconnect();
+	}
+	
+	@Test
+	public void testSend() throws Exception {
+		// given
+		SmslibCamelMessage smslibCamelMessageMock = mock(SmslibCamelMessage.class);
+		COutgoingMessage cOutgoingMessageMock = mock(COutgoingMessage.class);
+		when(translator.translateOutgoing(smslibCamelMessageMock)).thenReturn(cOutgoingMessageMock);
+		
+		// when
+		service.send(smslibCamelMessageMock);
+		
+		// then
+		verify(translator).translateOutgoing(smslibCamelMessageMock);
+		verify(cServiceMock).sendMessage(cOutgoingMessageMock);
+	}
+	
+	@Test
+	public void testSendFailureHandlingForMessageTranslateFailure() throws Exception {
+		// given
+		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
+		when(translator.translateOutgoing(camelMessage)).thenThrow(new TranslateException());
+		
+		// when then
+		try {
+			service.send(camelMessage);
+			fail();
+		} catch(TranslateException ex) {
+			// expected
+		}
+	}
+	
+	@Test
+	public void testSendFailureHandlingForMessageRejectedByCservice() throws Exception {
+		// given
+		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
+		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
+		when(translator.translateOutgoing(camelMessage)).thenReturn(smslibMessage);
+		doThrow(new MessageRejectedException()).when(cServiceMock).sendMessage(smslibMessage);
+		
+		// when then
+		try {
+			service.send(camelMessage);
+			fail();
+		} catch(MessageRejectedException ex) {
+			// expected
+		}
+	}
+	
+	@Test
+	public void testSendFailureHandlingForCserviceStopped() throws Exception {
+		// given
+		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
+		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
+		when(translator.translateOutgoing(camelMessage)).thenReturn(smslibMessage);
+		doThrow(new ConnectionFailedException()).when(cServiceMock).sendMessage(smslibMessage);
+		
+		// when then
+		try {
+			service.send(camelMessage);
+		} catch(ConnectionFailedException e) {
+			// expected
+		}
+	}
+	
+	@Test
+	public void testReceive() {
+		throw new RuntimeException("This test has not been written yet... looks like the consumer hasn't been either.");
 	}
 }
