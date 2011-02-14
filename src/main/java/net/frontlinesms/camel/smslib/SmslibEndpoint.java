@@ -30,4 +30,9 @@ public class SmslibEndpoint extends DefaultEndpoint {
 	public boolean isSingleton() {
 		return true; // only instance of SmslibEndpoint per URI, please
 	}
+	
+	@Override
+	public boolean isLenientProperties() {
+		return true;
+	}
 }

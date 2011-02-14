@@ -35,8 +35,8 @@ public class CServiceFactoryTest {
 	@Test
 	public void testDefaultParamterValues() throws Exception {
 		// when
-		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(null);
+		whenNew(CService.class).withArguments("COM1", 57600,
+				"", "", "").thenReturn(null);
 		factory.create("smslib://COM1", "COM1", NO_PARAMS);
 		
 		// then
