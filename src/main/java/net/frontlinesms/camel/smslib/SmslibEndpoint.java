@@ -20,6 +20,8 @@ public class SmslibEndpoint extends DefaultEndpoint {
 	}
 
 	public SmslibConsumer createConsumer(Processor processor) throws Exception {
+		// FIXME discussion on #camel IRC suggests that throwing an exception here would be incorrect, and
+		// instead the instance of Consumer should be returned
 		SmslibConsumer consumer = new SmslibConsumer(this, smslibService, processor);
 		smslibService.setConsumer(consumer);
 		return consumer;
@@ -27,6 +29,8 @@ public class SmslibEndpoint extends DefaultEndpoint {
 	}
 
 	public SmslibProducer createProducer() throws Exception {
+		// FIXME discussion on #camel IRC suggests that throwing an exception here would be incorrect, and
+		// instead the instance of Producer should be returned
 		SmslibProducer producer = new SmslibProducer(this, smslibService);
 		smslibService.setProducer(producer);
 		return producer;

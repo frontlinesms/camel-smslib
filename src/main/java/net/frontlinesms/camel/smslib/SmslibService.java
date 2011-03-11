@@ -33,6 +33,7 @@ public class SmslibService {
 	public synchronized void startForConsumer() throws Exception {
 		assert(consumer != null);
 		consumerRunning = true;
+		new ReceiveThread().start();
 		cService.connect();
 	}
 
@@ -101,5 +102,24 @@ public class SmslibService {
 			throw new SmslibServiceException("Consumer already set.");
 		}
 		this.consumer = consumer;
+	}
+	
+	class ReceiveThread extends Thread {
+		public void run() {
+			while(consumerRunning) {
+				try {
+					doReceive();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
