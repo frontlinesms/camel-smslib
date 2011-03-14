@@ -15,10 +15,35 @@
   <packaging>bundle</packaging>
   <name>Camel :: SMSLib</name>
   <description>Camel SMSLib support</description>
+  <version>0.0.1-SNAPSHOT</version>
+  
+	<scm>
+		<connection>scm:git://github.com/${github.projectOwner}/${github.projectName}.git</connection>
+		<developerConnection>scm:git:git@github.com:${github.projectOwner}/${github.projectName}.git</developerConnection>
+	</scm>
+	
+	<repositories>
+		<repository>
+			<id>frontlinesms.repo</id>
+			<name>FrontlineSMS repository</name>
+			<url>http://dev.frontlinesms.com/m2repo</url>
+		</repository>
+	</repositories>
+	
+	<distributionManagement>
+		<repository>
+			<id>frontlinesms.repo</id>
+			<name>FrontlineSMS repository</name>
+			<url>ftp://dev.frontlinesms.com</url>
+		</repository>
+	</distributionManagement>
 
   <properties>
     <camel.osgi.export.pkg>net.frontlinesms.camel.smslib.*</camel.osgi.export.pkg>
     <powermock.version>1.4.7</powermock.version>
+	
+	<github.projectOwner>frontlinesms</github.projectOwner>
+	<github.projectName>camel-smslib</github.projectName>
   </properties>
 
   <dependencies>
@@ -58,7 +83,7 @@
     <dependency>
       <groupId>net.frontlinesms.test</groupId>
       <artifactId>hayescommandset-test</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
