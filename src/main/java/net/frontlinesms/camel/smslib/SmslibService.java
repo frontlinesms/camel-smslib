@@ -36,16 +36,16 @@ public class SmslibService {
 	public synchronized void stopForProducer() throws Exception {
 		assert(producer != null);
 		producerRunning = false;
-		stopFor(producer);
+		stopIfUnused();
 	}
 	
 	public synchronized void stopForConsumer() throws Exception {
 		assert(consumer != null);
 		consumerRunning = false;
-		stopFor(consumer);
+		stopIfUnused();
 	}
 
-	private synchronized void stopFor(SmslibServiceProducer user) throws Exception {
+	private synchronized void stopIfUnused() throws Exception {
 		if(cService.isConnected()
 				&& !producerRunning
 				&& !consumerRunning) {
