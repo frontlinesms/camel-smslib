@@ -29,7 +29,9 @@ public class Main {
 				"AT+CREG?", "ERROR", // gsm network reg
 				"AT+CMGF=0", "OK",
 				"+++", "", // switch 2 command mode
-				"AT+CPMS?", "+CPMS:\r\"ME\",1,15,\"SM\",0,100\rOK" // get storage locations
+				"AT+CPMS?", "+CPMS:\r\"ME\",1,15,\"SM\",0,100\rOK", // get storage locations
+				"AT+CPMS=\"ME\"", "OK",
+				"AT+CMGL=0", "+CMGL: 1,0,,51\r0791947101670000040485080039004010411171334029D737DB7C0EBBCF2E69D8BD6603C865D739DD22975DE3771B747DB3CDE7B0FB0CA296E774\r+CMGL: 2,1,,43\r0791947101670000040485080039004010313131604020D737DB7C0EBBCF2E69D8BD6603C865D739DD22975DE3771B442DCFE9\rOK"
 				);
 		MockSerial.setIdentifier("COM1", new CommPortIdentifier("COM1", portHandler));
 		
