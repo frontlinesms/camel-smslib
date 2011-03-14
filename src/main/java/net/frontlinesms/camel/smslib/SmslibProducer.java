@@ -21,8 +21,8 @@ class SmslibProducer extends DefaultProducer implements SmslibServiceProducer {
 	/** @see Processor#process(Exchange) */
 	public void process(Exchange exchange) throws Exception {
 		Message in = exchange.getIn();
-		assert(in instanceof SmslibCamelMessage);
-		this.smslibService.send((SmslibCamelMessage) in);
+		assert(in instanceof OutgoingSmslibCamelMessage);
+		this.smslibService.send((OutgoingSmslibCamelMessage) in);
 	}
 	
 	@Override

@@ -1,7 +1,15 @@
 package net.frontlinesms.camel.smslib;
 
-import org.apache.camel.Message;
+import org.smslib.CMessage;
 
-interface SmslibCamelMessage extends Message {
-
+abstract class SmslibCamelMessage<E extends CMessage> extends org.apache.camel.impl.DefaultMessage implements org.apache.camel.Message {
+	private final E cMessage;
+	
+	SmslibCamelMessage(E cMessage) {
+		this.cMessage = cMessage;
+	}
+	
+	public E getCMessage() {
+		return this.cMessage;
+	}
 }

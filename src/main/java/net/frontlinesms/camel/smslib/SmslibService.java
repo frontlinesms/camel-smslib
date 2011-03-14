@@ -3,17 +3,12 @@ package net.frontlinesms.camel.smslib;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 import org.smslib.CIncomingMessage;
-import org.smslib.COutgoingMessage;
 import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 
 public class SmslibService {
-	private Log log;
-	
 	private final CService cService;
-	private SmslibMessageTranslator translator;
 	
 	private SmslibProducer producer;
 	private SmslibConsumer consumer;
@@ -23,13 +18,8 @@ public class SmslibService {
 
 	public SmslibService(CServiceFactory cServiceFactory, String uri, String remaining, Map<String, Object> parameters) {
 		this.cService = cServiceFactory.create(uri, remaining, parameters);
-		this.translator = new SmslibMessageTranslator();
 	}
 	
-	public void setTranslator(SmslibMessageTranslator translator) {
-		this.translator = translator;
-	}
-
 	public synchronized void startForConsumer() throws Exception {
 		assert(consumer != null);
 		consumerRunning = true;
@@ -63,25 +53,16 @@ public class SmslibService {
 		}
 	}
 
-	public void send(SmslibCamelMessage message) throws Exception {
-		COutgoingMessage cOutgoingMessage = this.translator.translateOutgoing(message);
-		this.cService.sendMessage(cOutgoingMessage);
+	public void send(OutgoingSmslibCamelMessage message) throws Exception {
+		this.cService.sendMessage(message.getCMessage());
 	}
 
 	public void doReceive() throws Exception {
 		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
 		this.cService.readMessages(messageList, MessageClass.UNREAD);
 		for(CIncomingMessage m : messageList) {
-			try {
-				this.consumer.accept(translator.translateIncoming(m));
-			} catch(TranslateException ex) {
-				log.warn(ex);
-			}
+			this.consumer.accept(new IncomingSmslibCamelMessage(m));
 		}
-	}
-
-	public void setLog(Log log) {
-		this.log = log;
 	}
 
 	public synchronized SmslibProducer getProducer() {

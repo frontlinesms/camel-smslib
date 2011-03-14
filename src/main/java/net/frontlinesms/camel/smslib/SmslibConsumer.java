@@ -31,7 +31,7 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceProd
 		this.smslibService.stopForConsumer();
 	}
 	
-	public void accept(SmslibCamelMessage message) {
+	public void accept(IncomingSmslibCamelMessage message) {
 		Exchange exchange = getEndpoint().createExchange();
 		exchange.setIn(message);
 		Processor processor = this.getProcessor();

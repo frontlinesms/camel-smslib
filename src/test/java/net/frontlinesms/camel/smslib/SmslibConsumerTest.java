@@ -51,7 +51,7 @@ public class SmslibConsumerTest {
 	@Test
 	public void testAccept() throws Exception {
 		// given
-		SmslibCamelMessage message = mock(SmslibCamelMessage.class);
+		IncomingSmslibCamelMessage message = mock(IncomingSmslibCamelMessage.class);
 		Exchange exchange = mock(Exchange.class);
 		when(mockEndpoint.createExchange()).thenReturn(exchange);
 		

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -24,8 +24,6 @@ import static org.mockito.Mockito.*;
 public class SmslibServiceTest {
 	CService cServiceMock;
 	CServiceFactory cServiceFactory;
-	SmslibMessageTranslator translator;
-	Log logMock;
 
 	Map<String, Object> parameters;
 	String remaining;
@@ -47,12 +45,12 @@ public class SmslibServiceTest {
 		when(cServiceFactory.create(uri, remaining, parameters)).thenReturn(cServiceMock);
 		
 		service = new SmslibService(cServiceFactory, uri, remaining, parameters);
-
-		translator = mock(SmslibMessageTranslator.class);
-		service.setTranslator(translator);
-		
-		logMock = mock(Log.class);
-		service.setLog(logMock);
+	}
+	
+	@After
+	public void tearDown() {
+		cServiceMock = null;
+		cServiceFactory = null;
 	}
 	
 	@Test
@@ -127,10 +125,11 @@ public class SmslibServiceTest {
 		// verify
 		verify(cServiceMock, never()).disconnect();
 	}
-	
+
 	@Test
 	public void testCServiceStopIfNoMoreUsers() throws Exception {
 		// given
+		
 		SmslibProducer mockProducer = mock(SmslibProducer.class);
 		service.setProducer(mockProducer);
 		service.startForProducer();
@@ -181,39 +180,21 @@ public class SmslibServiceTest {
 	@Test
 	public void testSend() throws Exception {
 		// given
-		SmslibCamelMessage smslibCamelMessageMock = mock(SmslibCamelMessage.class);
 		COutgoingMessage cOutgoingMessageMock = mock(COutgoingMessage.class);
-		when(translator.translateOutgoing(smslibCamelMessageMock)).thenReturn(cOutgoingMessageMock);
+		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(cOutgoingMessageMock);
 		
 		// when
-		service.send(smslibCamelMessageMock);
+		service.send(camelMessage);
 		
 		// then
-		verify(translator).translateOutgoing(smslibCamelMessageMock);
 		verify(cServiceMock).sendMessage(cOutgoingMessageMock);
-	}
-	
-	@Test
-	public void testSendFailureHandlingForMessageTranslateFailure() throws Exception {
-		// given
-		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
-		when(translator.translateOutgoing(camelMessage)).thenThrow(new TranslateException());
-		
-		// when then
-		try {
-			service.send(camelMessage);
-			fail();
-		} catch(TranslateException ex) {
-			// expected
-		}
 	}
 	
 	@Test
 	public void testSendFailureHandlingForMessageRejectedByCservice() throws Exception {
 		// given
-		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
 		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
-		when(translator.translateOutgoing(camelMessage)).thenReturn(smslibMessage);
+		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(smslibMessage);
 		doThrow(new MessageRejectedException()).when(cServiceMock).sendMessage(smslibMessage);
 		
 		// when then
@@ -228,9 +209,8 @@ public class SmslibServiceTest {
 	@Test
 	public void testSendFailureHandlingForCserviceStopped() throws Exception {
 		// given
-		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
 		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
-		when(translator.translateOutgoing(camelMessage)).thenReturn(smslibMessage);
+		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(smslibMessage);
 		doThrow(new ConnectionFailedException()).when(cServiceMock).sendMessage(smslibMessage);
 		
 		// when then
@@ -247,7 +227,6 @@ public class SmslibServiceTest {
 		// given
 		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
 		service.setConsumer(consumerMock);
-		service.startForConsumer();
 		doAnswer(new Answer() {
 			public Object answer(InvocationOnMock inv) {
 				LinkedList<CIncomingMessage> messageList =
@@ -256,41 +235,11 @@ public class SmslibServiceTest {
 				return null;
 			}
 		}).when(cServiceMock).readMessages(any(LinkedList.class), eq(MessageClass.UNREAD));
-		SmslibCamelMessage camelMessage = mock(SmslibCamelMessage.class);
-		when(translator.translateIncoming(any(CIncomingMessage.class))).thenReturn(camelMessage);
 		
 		// when
 		service.doReceive();
 		
 		// then
-		verify(consumerMock, times(3)).accept(any(SmslibCamelMessage.class));
-	}
-	
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testReceiveWithOneBadMessage() throws Exception {
-		// given
-		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
-		service.setConsumer(consumerMock);
-		service.startForConsumer();
-		final CIncomingMessage badMessage = mock(CIncomingMessage.class);
-		doAnswer(new Answer() {
-			public Object answer(InvocationOnMock inv) {
-				LinkedList<CIncomingMessage> messageList =
-						(LinkedList<CIncomingMessage>) inv.getArguments()[0];
-				messageList.add(badMessage);
-				for(int i=0; i<3; ++i) messageList.add(mock(CIncomingMessage.class));
-				return null;
-			}
-		}).when(cServiceMock).readMessages(any(LinkedList.class), eq(MessageClass.UNREAD));
-		TranslateException translateException = new TranslateException();
-		when(translator.translateIncoming(badMessage)).thenThrow(translateException);
-		
-		// when
-		service.doReceive();
-		
-		// then
-		verify(logMock).warn(translateException);
-		verify(consumerMock, times(3)).accept(any(SmslibCamelMessage.class));
+		verify(consumerMock, times(3)).accept(any(IncomingSmslibCamelMessage.class));
 	}
 }

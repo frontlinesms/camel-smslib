@@ -42,7 +42,7 @@ public class SmslibProducerTest {
 	@Test
 	public void testProcessing() throws Exception {
 		Exchange sendMessageExchange = mock(Exchange.class);
-		SmslibCamelMessage message = mock(SmslibCamelMessage.class);
+		OutgoingSmslibCamelMessage message = mock(OutgoingSmslibCamelMessage.class);
 		when(sendMessageExchange.getIn()).thenReturn(message);
 		
 		p.process(sendMessageExchange);
