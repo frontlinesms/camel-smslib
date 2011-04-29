@@ -22,6 +22,6 @@ public class SmslibComponent extends DefaultComponent {
 	/** @see DefaultComponent#createEndpoint(String, String, Map) */
 	@Override
 	protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
-		return new SmslibEndpoint(uri, remaining, parameters);
+		return new SmslibEndpoint(uri, this.getCamelContext(), remaining, parameters);
 	}
 }

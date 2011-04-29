@@ -41,7 +41,7 @@ public class SmslibEndpointTest {
 				.withArguments(mockCServiceFactory, URI, REMAINING, NO_PARAMS)
 				.thenReturn(mockSmslibService);
 		
-		endpoint = new SmslibEndpoint(URI, REMAINING, NO_PARAMS);
+		endpoint = new SmslibEndpoint(URI, null, REMAINING, NO_PARAMS);
 	}
 	
 	@Test

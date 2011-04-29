@@ -1,4 +1,13 @@
+// Maven temp files
+target/
+
+// Eclipse temp files
 .classpath
 .project
 .settings/
-target/
+
+// IntelliJ/Netbeans  temp files
+camel-smslib.iml
+
+// vim temp files
+*~

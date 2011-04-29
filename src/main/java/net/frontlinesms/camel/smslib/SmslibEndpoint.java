@@ -4,6 +4,7 @@
 package net.frontlinesms.camel.smslib;
 
 import java.util.Map;
+import org.apache.camel.CamelContext;
 
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultEndpoint;
@@ -14,8 +15,8 @@ import org.apache.camel.impl.DefaultEndpoint;
 public class SmslibEndpoint extends DefaultEndpoint {
 	private final SmslibService smslibService;
 	
-	SmslibEndpoint(String uri, String remaining, Map<String, Object> parameters) {
-		super(uri);
+	SmslibEndpoint(String uri, CamelContext camelContext, String remaining, Map<String, Object> parameters) {
+		super(uri, camelContext);
 		smslibService = new SmslibService(new CServiceFactory(), uri, remaining, parameters);
 	}
 
