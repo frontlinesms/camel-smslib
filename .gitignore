@@ -1,4 +1,11 @@
+# build files
+target/
+
+# Eclipse project files
 .classpath
 .project
 .settings/
-target/
+
+# IntelliJ project files
+camel-smslib.iml
+
