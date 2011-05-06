@@ -6,6 +6,8 @@ target/
 .project
 .settings/
 
-# IntelliJ project files
+# IntelliJ/Netbeans project files
 camel-smslib.iml
 
+// vim temp files
+*~

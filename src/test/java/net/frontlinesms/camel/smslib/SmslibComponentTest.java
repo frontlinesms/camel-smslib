@@ -33,7 +33,7 @@ public class SmslibComponentTest {
 		// given
 		SmslibEndpoint mockEndpoint = mock(SmslibEndpoint.class);
 		when(mockEndpoint.isLenientProperties()).thenReturn(true);
-		whenNew(SmslibEndpoint.class).withArguments(anyString(), anyString(), anyMap()).thenReturn(mockEndpoint);
+		whenNew(SmslibEndpoint.class).withArguments(anyString(), any(), anyString(), anyMap()).thenReturn(mockEndpoint);
 		
 		// when
 		comp.createEndpoint("smslib://whatever?baud=1");
