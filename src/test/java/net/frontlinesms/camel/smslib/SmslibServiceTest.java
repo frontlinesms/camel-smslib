@@ -82,7 +82,7 @@ public class SmslibServiceTest {
 		service.startForProducer();
 		
 		// then
-		verify(cServiceMock).connect();
+		verify(cServiceMock, never()).connect();
 	}
 	
 	@Test

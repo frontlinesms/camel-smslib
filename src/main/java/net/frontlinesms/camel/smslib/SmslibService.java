@@ -24,13 +24,13 @@ public class SmslibService {
 		assert(consumer != null);
 		consumerRunning = true;
 		new ReceiveThread().start();
-		cService.connect();
+		startService();
 	}
 
 	public synchronized void startForProducer() throws Exception {
 		assert(producer != null);
 		producerRunning = true;
-		cService.connect();
+		startService();
 	}
 	
 	public synchronized void stopForProducer() throws Exception {
@@ -50,6 +50,12 @@ public class SmslibService {
 				&& !producerRunning
 				&& !consumerRunning) {
 			cService.disconnect();
+		}
+	}
+
+	private synchronized void startService() throws Exception {
+		if(!cService.isConnected()) {
+			cService.connect();
 		}
 	}
 
