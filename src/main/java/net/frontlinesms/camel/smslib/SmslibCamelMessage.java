@@ -7,7 +7,7 @@ abstract class SmslibCamelMessage<E extends CMessage> extends org.apache.camel.i
 	
 	SmslibCamelMessage(E cMessage) {
 		this.cMessage = cMessage;
-		setBody(cMessage);
+		this.setBody(cMessage);
 	}
 	
 	public E getCMessage() {

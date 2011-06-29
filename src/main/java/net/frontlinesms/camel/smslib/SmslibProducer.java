@@ -6,6 +6,7 @@ package net.frontlinesms.camel.smslib;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
+import org.smslib.COutgoingMessage;
 
 /**
  * @author Alex Anderson
@@ -20,9 +21,8 @@ class SmslibProducer extends DefaultProducer implements SmslibServiceProducer {
 
 	/** @see Processor#process(Exchange) */
 	public void process(Exchange exchange) throws Exception {
-		Message in = exchange.getIn();
-		assert(in instanceof OutgoingSmslibCamelMessage);
-		this.smslibService.send((OutgoingSmslibCamelMessage) in);
+		OutgoingSmslibCamelMessage msg = new OutgoingSmslibCamelMessage((COutgoingMessage) exchange.getIn().getBody());
+		this.smslibService.send(msg);
 	}
 	
 	@Override

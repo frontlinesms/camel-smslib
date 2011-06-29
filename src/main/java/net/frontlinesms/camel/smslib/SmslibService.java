@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.smslib.CIncomingMessage;
+import org.smslib.COutgoingMessage;
 import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 

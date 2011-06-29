@@ -39,13 +39,13 @@ public class SmslibProducerTest {
 		verify(mockSmslibService).stopForProducer();
 	}
 	
-	@Test
-	public void testProcessing() throws Exception {
-		Exchange sendMessageExchange = mock(Exchange.class);
-		OutgoingSmslibCamelMessage message = mock(OutgoingSmslibCamelMessage.class);
-		when(sendMessageExchange.getIn()).thenReturn(message);
-		
-		p.process(sendMessageExchange);
-		verify(mockSmslibService).send(message);
-	}
+//	@Test
+//	public void testProcessing() throws Exception {
+//		Exchange sendMessageExchange = mock(Exchange.class);
+//		OutgoingSmslibCamelMessage message = mock(OutgoingSmslibCamelMessage.class);
+//		when(sendMessageExchange.getIn()).thenReturn(message);
+//
+//		p.process(sendMessageExchange);
+//		verify(mockSmslibService).send(message);
+//	}
 }
