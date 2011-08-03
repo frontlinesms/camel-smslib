@@ -3,8 +3,12 @@
  */
 package net.frontlinesms.camel.smslib;
 
-import static org.powermock.api.mockito.PowerMockito.*;
-import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.verifyNew;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +37,10 @@ public class CServiceFactoryTest {
 	}
 
 	@Test
-	public void testDefaultParamterValues() throws Exception {
+	public void testDefaultParameterValues() throws Exception {
 		// when
 		whenNew(CService.class).withArguments("COM1", 57600,
-				"", "", "").thenReturn(null);
+				"", "", "").thenReturn(mock(CService.class));
 		factory.create("smslib://COM1", "COM1", NO_PARAMS);
 		
 		// then
@@ -47,12 +51,13 @@ public class CServiceFactoryTest {
 	public void testParameterPassing() throws Exception {
 		// when
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(null);
+				anyString(), anyString(), anyString()).thenReturn(mock(CService.class));
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
 				"model", "1200",
-				"handler", "Nokia_S40_3ed"));
+				"handler", "Nokia_S40_3ed",
+				"pin", null));
 		
 		// then
 		verifyNew(CService.class).withArguments("COM1", 9600, "Nokia", "1200", "Nokia_S40_3ed");

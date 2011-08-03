@@ -4,7 +4,6 @@
 package net.frontlinesms.camel.smslib;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 import org.smslib.COutgoingMessage;
 

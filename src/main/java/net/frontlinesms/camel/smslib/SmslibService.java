@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.smslib.CIncomingMessage;
-import org.smslib.COutgoingMessage;
 import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 
@@ -66,9 +65,14 @@ public class SmslibService {
 
 	public void doReceive() throws Exception {
 		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
-		this.cService.readMessages(messageList, MessageClass.UNREAD);
+		this.cService.readMessages(messageList, MessageClass.ALL);
 		for(CIncomingMessage m : messageList) {
 			this.consumer.accept(new IncomingSmslibCamelMessage(m));
+			// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
+			// not desired and this behaviour should not be forced
+			System.out.println("Deleting message...");
+			this.cService.deleteMessage(m);
+			System.out.println("Message deleted.");
 		}
 	}
 
