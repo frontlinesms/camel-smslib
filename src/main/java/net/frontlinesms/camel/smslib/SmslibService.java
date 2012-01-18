@@ -8,6 +8,8 @@ import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 
 public class SmslibService {
+	static { System.out.println("SmsLibService class loaded."); }
+	
 	private final CService cService;
 	
 	private SmslibProducer producer;
@@ -15,9 +17,19 @@ public class SmslibService {
 	
 	private boolean consumerRunning;
 	private boolean producerRunning;
+	
+	private MessageClass receiveMessageClass = MessageClass.ALL;
 
 	public SmslibService(CServiceFactory cServiceFactory, String uri, String remaining, Map<String, Object> parameters) {
 		this.cService = cServiceFactory.create(uri, remaining, parameters);
+		
+		Object receiveMessageClass = parameters.get("receiveMessageClass");
+		if(receiveMessageClass != null) {
+			if(receiveMessageClass instanceof MessageClass)
+				this.receiveMessageClass = (MessageClass) receiveMessageClass;
+			else warn("Could not set receiveMessageClass to value " + receiveMessageClass +
+					" of class " + receiveMessageClass.getClass());
+		}
 	}
 	
 	public synchronized void startForConsumer() throws Exception {
@@ -65,7 +77,7 @@ public class SmslibService {
 
 	public void doReceive() throws Exception {
 		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
-		this.cService.readMessages(messageList, MessageClass.ALL);
+		this.cService.readMessages(messageList, receiveMessageClass);
 		for(CIncomingMessage m : messageList) {
 			this.consumer.accept(new IncomingSmslibCamelMessage(m));
 			// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
@@ -96,6 +108,10 @@ public class SmslibService {
 		this.consumer = consumer;
 	}
 	
+	public void setReceiveMessageClass(MessageClass receiveMessageClass) {
+		this.receiveMessageClass = receiveMessageClass;
+	}
+	
 	class ReceiveThread extends Thread {
 		public void run() {
 			while(consumerRunning) {
@@ -113,5 +129,9 @@ public class SmslibService {
 				}
 			}
 		}
+	}
+	
+	private void warn(String message) {
+		System.out.println("WARN: " + message);
 	}
 }
