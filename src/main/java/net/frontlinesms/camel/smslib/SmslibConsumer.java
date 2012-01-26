@@ -8,8 +8,10 @@ import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
 
 /**
+ * TODO this should be an idempotent consumer (https://camel.apache.org/idempotent-consumer.html) to swallow any repeated messages
+ * recovered from a device (e.g. if messages are not deleted off the device).
+ * TODO this should also be a polling consumer, and then {@link SmslibService} would not need to run a thread.
  * @author aga
- *
  */
 public class SmslibConsumer extends DefaultConsumer implements SmslibServiceProducer {
 	private final SmslibService smslibService;

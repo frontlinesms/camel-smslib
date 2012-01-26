@@ -15,7 +15,7 @@ import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 
 import serial.mock.MockSerial;
-import serial.mock.NoSuchPortException;
+import serial.NoSuchPortException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -284,5 +284,23 @@ public class SmslibServiceTest {
 		service.doReceive();
 		// then
 		verify(consumerMock, times(3)).accept(any(IncomingSmslibCamelMessage.class));
+	}
+	
+	@Test
+	public void ifStartForProducerFailsThenProducerShouldBeNull() throws Exception {
+		// given
+		SmslibProducer prod = mock(SmslibProducer.class);
+		service.setProducer(prod);
+		doThrow(new NoSuchPortException(new RuntimeException())).when(cServiceMock).connect();
+		
+		// when
+		try {
+			service.startForProducer();
+			fail(".startForProducer() should have thrown serial Exception");
+		} catch(NoSuchPortException expected) {}
+		
+		// then
+		assertNull(service.getProducer());
+		assertFalse(service.isProducerRunning());
 	}
 }

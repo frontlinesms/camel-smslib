@@ -20,6 +20,7 @@ public class SmslibService {
 	
 	private MessageClass receiveMessageClass = MessageClass.ALL;
 
+//> CONSTRUCTORS
 	public SmslibService(CServiceFactory cServiceFactory, String uri, String remaining, Map<String, Object> parameters) {
 		this.cService = cServiceFactory.create(uri, remaining, parameters);
 		
@@ -32,60 +33,17 @@ public class SmslibService {
 		}
 	}
 	
-	public synchronized void startForConsumer() throws Exception {
-		assert(consumer != null);
-		consumerRunning = true;
-		new ReceiveThread().start();
-		startService();
-	}
-
-	public synchronized void startForProducer() throws Exception {
-		assert(producer != null);
-		producerRunning = true;
-		startService();
+//> ACCESSORS
+	public boolean isConsumerRunning() {
+		return consumerRunning;
 	}
 	
-	public synchronized void stopForProducer() throws Exception {
-		assert(producer != null);
-		producerRunning = false;
-		stopIfUnused();
+	public boolean isProducerRunning() {
+		return producerRunning;
 	}
 	
-	public synchronized void stopForConsumer() throws Exception {
-		assert(consumer != null);
-		consumerRunning = false;
-		stopIfUnused();
-	}
-
-	private synchronized void stopIfUnused() throws Exception {
-		if(cService.isConnected()
-				&& !producerRunning
-				&& !consumerRunning) {
-			cService.disconnect();
-		}
-	}
-
-	private synchronized void startService() throws Exception {
-		if(!cService.isConnected()) {
-			cService.connect();
-		}
-	}
-
-	public void send(OutgoingSmslibCamelMessage message) throws Exception {
-		this.cService.sendMessage(message.getCMessage());
-	}
-
-	public void doReceive() throws Exception {
-		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
-		this.cService.readMessages(messageList, receiveMessageClass);
-		for(CIncomingMessage m : messageList) {
-			this.consumer.accept(new IncomingSmslibCamelMessage(m));
-			// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
-			// not desired and this behaviour should not be forced
-			System.out.println("Deleting message...");
-			this.cService.deleteMessage(m);
-			System.out.println("Message deleted.");
-		}
+	public void setReceiveMessageClass(MessageClass receiveMessageClass) {
+		this.receiveMessageClass = receiveMessageClass;
 	}
 
 	public synchronized SmslibProducer getProducer() {
@@ -108,8 +66,68 @@ public class SmslibService {
 		this.consumer = consumer;
 	}
 	
-	public void setReceiveMessageClass(MessageClass receiveMessageClass) {
-		this.receiveMessageClass = receiveMessageClass;
+//> SERVICE METHODS
+	public synchronized void startForConsumer() throws Exception {
+		assert(consumer != null);
+		consumerRunning = true;
+		new ReceiveThread().start();
+		startService();
+	}
+
+	public synchronized void startForProducer() throws Exception {
+		assert(producer != null);
+		try {
+			producerRunning = true;
+			startService();
+		} catch(Exception ex) {
+			producerRunning = false;
+			producer = null;
+			throw ex;
+		}
+	}
+	
+	public synchronized void stopForProducer() throws Exception {
+		assert(producer != null);
+		producerRunning = false;
+		stopIfUnused();
+	}
+	
+	public synchronized void stopForConsumer() throws Exception {
+		assert(consumer != null);
+		consumerRunning = false;
+		stopIfUnused();
+	}
+
+	private synchronized void stopIfUnused() throws Exception {
+		if(cService.isConnected()
+				&& !producerRunning
+				&& !consumerRunning) {
+			cService.disconnect();
+		}
+	}
+
+//> SEND/RECEIVE METHODS
+	private synchronized void startService() throws Exception {
+		if(!cService.isConnected()) {
+			cService.connect();
+		}
+	}
+
+	public void send(OutgoingSmslibCamelMessage message) throws Exception {
+		this.cService.sendMessage(message.getCMessage());
+	}
+
+	public void doReceive() throws Exception {
+		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
+		this.cService.readMessages(messageList, receiveMessageClass);
+		for(CIncomingMessage m : messageList) {
+			this.consumer.accept(new IncomingSmslibCamelMessage(m));
+			// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
+			// not desired and this behaviour should not be forced
+			System.out.println("Deleting message...");
+			this.cService.deleteMessage(m);
+			System.out.println("Message deleted.");
+		}
 	}
 	
 	class ReceiveThread extends Thread {
@@ -131,6 +149,7 @@ public class SmslibService {
 		}
 	}
 	
+//> LOGGING METHODS
 	private void warn(String message) {
 		System.out.println("WARN: " + message);
 	}
