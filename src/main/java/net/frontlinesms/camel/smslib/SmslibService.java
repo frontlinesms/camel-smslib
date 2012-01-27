@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.smslib.CIncomingMessage;
+import org.smslib.COutgoingMessage;
 import org.smslib.CService;
 import org.smslib.CService.MessageClass;
 
@@ -114,7 +115,11 @@ public class SmslibService {
 	}
 
 	public void send(OutgoingSmslibCamelMessage message) throws Exception {
-		this.cService.sendMessage(message.getCMessage());
+		COutgoingMessage cMess = message.getCMessage();
+		this.cService.sendMessage(cMess);
+		if(cMess.getRefNo() < 0) {
+			throw new MessageRejectedException(cMess);
+		}
 	}
 
 	public void doReceive() throws Exception {

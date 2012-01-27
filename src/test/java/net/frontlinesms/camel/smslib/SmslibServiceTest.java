@@ -196,19 +196,16 @@ public class SmslibServiceTest {
 	}
 	
 	@Test
-	public void testSendFailureHandlingForMessageRejectedByCservice() throws Exception {
+	public void testSendFailureHandlingCmsError() throws Exception {
 		// given
 		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
+		when(smslibMessage.getRefNo()).thenReturn(-1);
 		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(smslibMessage);
-		doThrow(new MessageRejectedException()).when(cServiceMock).sendMessage(smslibMessage);
 		
-		// when then
 		try {
 			service.send(camelMessage);
 			fail();
-		} catch(MessageRejectedException ex) {
-			// expected
-		}
+		} catch(MessageRejectedException expected) {}
 	}
 	
 	@Test

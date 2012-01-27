@@ -26,7 +26,6 @@ public class SmslibEndpoint extends DefaultEndpoint {
 		SmslibConsumer consumer = new SmslibConsumer(this, smslibService, processor);
 		smslibService.setConsumer(consumer);
 		return consumer;
-		
 	}
 
 	public SmslibProducer createProducer() throws Exception {

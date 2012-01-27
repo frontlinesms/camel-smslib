@@ -31,14 +31,14 @@
 		</repository>
 	</distributionManagement>
 
-  <properties>
-  	<camel.version>2.5.0</camel.version>
-	<camel.osgi.export.pkg>net.frontlinesms.camel.smslib.*</camel.osgi.export.pkg>
-	<powermock.version>1.4.9</powermock.version>
-	
-	<github.projectOwner>frontlinesms</github.projectOwner>
-	<github.projectName>camel-smslib</github.projectName>
-  </properties>
+	<properties>
+		<camel.version>2.5.0</camel.version>
+		<camel.osgi.export.pkg>net.frontlinesms.camel.smslib.*</camel.osgi.export.pkg>
+		<powermock.version>1.4.9</powermock.version>
+
+		<github.projectOwner>frontlinesms</github.projectOwner>
+		<github.projectName>camel-smslib</github.projectName>
+	</properties>
   
   	<build>	
 		<plugins>
