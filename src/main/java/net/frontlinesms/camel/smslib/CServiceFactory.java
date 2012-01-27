@@ -6,7 +6,7 @@ package net.frontlinesms.camel.smslib;
 import java.util.Map;
 
 import org.smslib.CService;
-import org.smslib.CService.MessageClass;
+import org.smslib.service.MessageClass;
 
 class CServiceFactory {
 	private static final int DEFAULT_BAUD = 57600;

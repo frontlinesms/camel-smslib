@@ -6,7 +6,7 @@ import java.util.Map;
 import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 import org.smslib.CService;
-import org.smslib.CService.MessageClass;
+import org.smslib.service.MessageClass;
 
 public class SmslibService {
 	static { System.out.println("SmsLibService class loaded."); }

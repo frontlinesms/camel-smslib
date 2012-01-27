@@ -1,6 +1,6 @@
 package main;
 
-import net.frontlinesms.test.serial.HayesPortHandler;
+import net.frontlinesms.test.serial.hayes.HayesPortHandler;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;

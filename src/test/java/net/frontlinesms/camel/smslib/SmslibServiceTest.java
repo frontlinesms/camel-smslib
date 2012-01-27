@@ -12,7 +12,7 @@ import org.mockito.stubbing.Answer;
 import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 import org.smslib.CService;
-import org.smslib.CService.MessageClass;
+import org.smslib.service.MessageClass;
 
 import serial.mock.MockSerial;
 import serial.NoSuchPortException;
