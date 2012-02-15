@@ -1,8 +1,12 @@
 package net.frontlinesms.camel.smslib;
 
+import static net.frontlinesms.camel.smslib.CamelSmslibTestUtils.*;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import net.frontlinesms.camel.smslib.SmslibService.ReceiveThread;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,12 +27,14 @@ import static org.mockito.Mockito.*;
 /** Unit test for {@link SmslibService} */
 public class SmslibServiceTest {
 	CService cServiceMock;
+	CService cServiceMock2;
 	CServiceFactory cServiceFactory;
 
 	Map<String, Object> parameters;
 	String remaining;
 	String uri;
 	
+	/** Class under test */
 	SmslibService service;
 	
 	@Before
@@ -38,11 +44,12 @@ public class SmslibServiceTest {
 		uri = "asdf";
 		remaining = "hjkl";
 		parameters = new HashMap<String, Object>();
-		
+
 		cServiceMock = mock(CService.class);
+		cServiceMock2 = mock(CService.class);
 		
 		cServiceFactory = mock(CServiceFactory.class);
-		when(cServiceFactory.create(uri, remaining, parameters)).thenReturn(cServiceMock);
+		when(cServiceFactory.create(uri, remaining, parameters)).thenReturn(cServiceMock, cServiceMock2);
 		
 		service = new SmslibService(cServiceFactory, uri, remaining, parameters);
 	}
@@ -58,16 +65,169 @@ public class SmslibServiceTest {
 		
 		service = null;
 	}
+
+	@Test
+	public void cServiceShouldBeInitialisedNull() {
+		assertNull(service.getCService());
+	}
 	
 	@Test
-	public void testCServiceCreation() throws NoSuchPortException {
+	public void startingProducerShouldInitialiseCService() throws Exception {
+		// when
+		service.setProducer(mockProducer());
+		service.startForProducer();
+		
+		// then
+		assertEquals(cServiceMock, service.getCService());
+	}
+	
+	@Test
+	public void startingConsumerShouldInitialiseCService() throws Exception {
+		// when
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		
+		// then
+		assertEquals(cServiceMock, service.getCService());
+	}
+	
+	@Test
+	public void startingConsumerWhenProducerAlreadyStartedShouldNotReinitialiseCservice() throws Exception {
+		// given
+		service.setProducer(mockProducer());
+		service.startForProducer();
+		
+		// when
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+
+		// then
 		verify(cServiceFactory).create(uri, remaining, parameters);
+		assertEquals(cServiceMock, service.getCService());
+	}
+	
+	@Test
+	public void startingProducerWhenConsumerAlreadyStartedShouldNotReinitialiseCservice() throws Exception {
+		// given
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		
+		// when
+		service.setProducer(mockProducer());
+		service.startForProducer();
+
+		// then
+		verify(cServiceFactory).create(uri, remaining, parameters);
+		assertEquals(cServiceMock, service.getCService());
+	}
+	
+	@Test
+	public void startingProducerAfterCserviceDiscardShouldCreateNewCservice() throws Exception {
+		// given
+		service.setProducer(mockProducer());
+		service.startForProducer();
+		service.stopForProducer();
+		
+		// when
+		service.setProducer(mockProducer());
+		service.startForProducer();
+		
+		// then
+		verify(cServiceFactory, times(2)).create(uri, remaining, parameters);
+		assertEquals(cServiceMock2, service.getCService());
+	}
+	
+	@Test
+	public void settingConsumerAfterCserviceDiscardShouldCreateNewCservice() throws Exception {
+		// given
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		service.stopForConsumer();
+		
+		// when
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		
+		// then
+		verify(cServiceFactory, times(2)).create(uri, remaining, parameters);
+		assertEquals(cServiceMock2, service.getCService());
+	}
+	
+	@Test
+	public void receiveThreadShouldBeInitialisedNull() throws Exception {
+		assertNull(service.getReceiveThread());
+	}
+	
+	public void settingConsumerShouldInitialiseReceiveThread() throws Exception {
+		// when
+		service.setConsumer(mockConsumer());
+		
+		// then
+		assertNotNull(service.getReceiveThread());
+	}
+	
+	@Test
+	public void stoppingConsumerShouldStopReceiveThread() throws Exception {
+		// given
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		ReceiveThread receiveThread = service.getReceiveThread();
+		assertFalse(receiveThread.isFinished());
+		
+		// when
+		service.stopForConsumer();
+		
+		// then
+		assertTrue(receiveThread.isFinished());
+	}
+	
+	public void stoppingConsumerShouldDiscardOldReceiveThread() throws Exception {
+		// given
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		
+		// when
+		service.stopForConsumer();
+		
+		// then
+		assertNull(service.getReceiveThread());
+	}
+	
+	@Test
+	public void stoppingConsumerShouldBlockUntilReceiveThreadDies() {
+		// TODO we should test this... when we've had more coffee
+	}
+	
+	@Test
+	public void stoppingForConsumerShouldDiscardTheConsumer() throws Exception {
+		// given
+		service.setConsumer(mockConsumer());
+		service.startForConsumer();
+		
+		// when
+		service.stopForConsumer();
+		
+		// then
+		assertNull(service.getConsumer());
+	}
+	
+	@Test
+	public void stoppingForProducerShouldDiscardTheProducer() throws Exception {
+		// given
+		service.setProducer(mockProducer());
+		service.startForProducer();
+		
+		// when
+		service.stopForProducer();
+		
+		// then
+		assertNull(service.getProducer());
 	}
 	
 	@Test
 	public void testCServiceStart() throws Exception {
 		// given
-		SmslibProducer mockProducer = mock(SmslibProducer.class);
+		SmslibProducer mockProducer = mockProducer();
 		service.setProducer(mockProducer);
 		
 		// when
@@ -80,7 +240,7 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceNoStartIfAlreadyStarted() throws Exception {
 		// given
-		SmslibProducer mockProducer = mock(SmslibProducer.class);
+		SmslibProducer mockProducer = mockProducer();
 		service.setProducer(mockProducer);
 		when(cServiceMock.isConnected()).thenReturn(true); // TODO this assumes that CService.isConnected() returns true while TRYING to conenct...
 		
@@ -92,10 +252,11 @@ public class SmslibServiceTest {
 	}
 	
 	@Test
-	public void testCServiceStop() throws Exception {
+	public void whenProducerAndConsumerBothStoppedCserviceShouldDisconnect() throws Exception {
 		// given
-		service.setProducer(mock(SmslibProducer.class));
+		service.setProducer(mockProducer());
 		when(cServiceMock.isConnected()).thenReturn(true);
+		service.startForProducer();
 		
 		// when
 		service.stopForProducer();
@@ -105,23 +266,25 @@ public class SmslibServiceTest {
 	}
 	
 	@Test
-	public void testCServiceNoStopIfNotStarted() throws Exception {
+	public void whenProducerAndConsumerBothStoppedCserviceShouldBeDiscarded() throws Exception {
 		// given
-		service.setProducer(mock(SmslibProducer.class));
+		service.setProducer(mockProducer());
+		when(cServiceMock.isConnected()).thenReturn(true);
+		service.startForProducer();
 		
 		// when
 		service.stopForProducer();
 		
-		// verify
-		verify(cServiceMock, never()).disconnect();
+		// then
+		assertNull(service.getCService());
 	}
 	
 	@Test
 	public void testCServiceNoStopIfOtherUsers() throws Exception {
 		// given
-		service.setProducer(mock(SmslibProducer.class));
+		service.setProducer(mockProducer());
 		service.startForProducer();
-		service.setConsumer(mock(SmslibConsumer.class));
+		service.setConsumer(mockConsumer());
 		service.startForConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
@@ -135,12 +298,8 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceStopIfNoMoreUsers() throws Exception {
 		// given		
-		SmslibProducer mockProducer = mock(SmslibProducer.class);
-		service.setProducer(mockProducer);
-		service.startForProducer();
-		SmslibConsumer mockConsumer = mock(SmslibConsumer.class);
-		service.setConsumer(mockConsumer);
-		service.startForConsumer();
+		setupAndStartProducer();
+		setupAndStartConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
@@ -157,11 +316,11 @@ public class SmslibServiceTest {
 	@Test
 	public void testMaxOneProducer() throws Exception {
 		// given
-		service.setProducer(mock(SmslibProducer.class));
+		service.setProducer(mockProducer());
 		
 		// when then
 		try {
-			service.setProducer(mock(SmslibProducer.class));
+			service.setProducer(mockProducer());
 			fail("Should not be able to start for more than one producer.");
 		} catch(SmslibServiceException ex) {
 			// expected
@@ -171,11 +330,11 @@ public class SmslibServiceTest {
 	@Test
 	public void testMaxOneConsumer() throws Exception {
 		// given
-		service.setConsumer(mock(SmslibConsumer.class));
+		service.setConsumer(mockConsumer());
 		
 		// when then
 		try {
-			service.setConsumer(mock(SmslibConsumer.class));
+			service.setConsumer(mockConsumer());
 			fail("Should not be able to start for more than one producer.");
 		} catch(SmslibServiceException ex) {
 			// expected
@@ -187,6 +346,7 @@ public class SmslibServiceTest {
 		// given
 		COutgoingMessage cOutgoingMessageMock = mock(COutgoingMessage.class);
 		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(cOutgoingMessageMock);
+		setupAndStartProducer();
 		
 		// when
 		service.send(camelMessage);
@@ -194,18 +354,22 @@ public class SmslibServiceTest {
 		// then
 		verify(cServiceMock).sendMessage(cOutgoingMessageMock);
 	}
-	
+
 	@Test
 	public void testSendFailureHandlingCmsError() throws Exception {
 		// given
 		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
 		when(smslibMessage.getRefNo()).thenReturn(-1);
 		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(smslibMessage);
+		setupAndStartProducer();
 		
+		// when
 		try {
 			service.send(camelMessage);
 			fail();
-		} catch(MessageRejectedException expected) {}
+		} catch(MessageRejectedException expected) {
+			// then exception expected
+		}
 	}
 	
 	@Test
@@ -214,6 +378,7 @@ public class SmslibServiceTest {
 		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
 		OutgoingSmslibCamelMessage camelMessage = new OutgoingSmslibCamelMessage(smslibMessage);
 		doThrow(new ConnectionFailedException()).when(cServiceMock).sendMessage(smslibMessage);
+		setupAndStartProducer();
 		
 		// when then
 		try {
@@ -227,8 +392,9 @@ public class SmslibServiceTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testReceive() throws Exception {
 		// given
-		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
+		SmslibConsumer consumerMock = mockConsumer();
 		service.setConsumer(consumerMock);
+		inject(service, "cService", cServiceMock);
 		doAnswer(new Answer() {
 			public Object answer(InvocationOnMock inv) {
 				LinkedList<CIncomingMessage> messageList =
@@ -266,8 +432,7 @@ public class SmslibServiceTest {
 		service = new SmslibService(cServiceFactory, uri, remaining, parameters);
 		
 		// given
-		SmslibConsumer consumerMock = mock(SmslibConsumer.class);
-		service.setConsumer(consumerMock);
+		SmslibConsumer consumerMock = setupAndStartConsumer();;
 		doAnswer(new Answer() {
 			public Object answer(InvocationOnMock inv) {
 				LinkedList<CIncomingMessage> messageList =
@@ -282,11 +447,11 @@ public class SmslibServiceTest {
 		// then
 		verify(consumerMock, times(3)).accept(any(IncomingSmslibCamelMessage.class));
 	}
-	
+
 	@Test
 	public void ifStartForProducerFailsThenProducerShouldBeNull() throws Exception {
 		// given
-		SmslibProducer prod = mock(SmslibProducer.class);
+		SmslibProducer prod = mockProducer();
 		service.setProducer(prod);
 		doThrow(new NoSuchPortException(new RuntimeException())).when(cServiceMock).connect();
 		
@@ -299,5 +464,26 @@ public class SmslibServiceTest {
 		// then
 		assertNull(service.getProducer());
 		assertFalse(service.isProducerRunning());
+	}
+	
+//> TEST HELPER METHODS
+	private SmslibProducer mockProducer() {
+		return mock(SmslibProducer.class);
+	}
+
+	private SmslibConsumer mockConsumer() {
+		return mock(SmslibConsumer.class);
+	}
+	
+	private void setupAndStartProducer() throws Exception {
+		service.setProducer(mockProducer());
+		service.startForProducer();
+	}
+	
+	private SmslibConsumer setupAndStartConsumer() throws Exception {
+		SmslibConsumer consumer = mockConsumer();
+		service.setConsumer(consumer);
+		service.startForConsumer();
+		return consumer;
 	}
 }

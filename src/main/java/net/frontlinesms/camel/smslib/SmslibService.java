@@ -11,7 +11,7 @@ import org.smslib.service.MessageClass;
 public class SmslibService {
 	static { System.out.println("SmsLibService class loaded."); }
 	
-	private final CService cService;
+	private CService cService;
 	
 	private SmslibProducer producer;
 	private SmslibConsumer consumer;
@@ -20,10 +20,20 @@ public class SmslibService {
 	private boolean producerRunning;
 	
 	private MessageClass receiveMessageClass = MessageClass.ALL;
+	
+	private final CServiceFactory cServiceFactory;
+	private final String uri;
+	private final String remaining;
+	private final Map<String, Object> parameters;
+
+	private ReceiveThread receiveThread;
 
 //> CONSTRUCTORS
 	public SmslibService(CServiceFactory cServiceFactory, String uri, String remaining, Map<String, Object> parameters) {
-		this.cService = cServiceFactory.create(uri, remaining, parameters);
+		this.cServiceFactory = cServiceFactory;
+		this.uri = uri;
+		this.remaining = remaining;
+		this.parameters = parameters;
 		
 		Object receiveMessageClass = parameters.get("receiveMessageClass");
 		if(receiveMessageClass != null) {
@@ -32,6 +42,10 @@ public class SmslibService {
 			else warn("Could not set receiveMessageClass to value " + receiveMessageClass +
 					" of class " + receiveMessageClass.getClass());
 		}
+	}
+	
+	private void initCService() {
+		this.cService = cServiceFactory.create(uri, remaining, parameters);
 	}
 	
 //> ACCESSORS
@@ -67,11 +81,20 @@ public class SmslibService {
 		this.consumer = consumer;
 	}
 	
+	public CService getCService() {
+		return cService;
+	}
+	
+	public ReceiveThread getReceiveThread() {
+		return receiveThread;
+	}
+	
 //> SERVICE METHODS
 	public synchronized void startForConsumer() throws Exception {
 		assert(consumer != null);
 		consumerRunning = true;
-		new ReceiveThread().start();
+		receiveThread = new ReceiveThread();
+		receiveThread.start();
 		startService();
 	}
 
@@ -91,24 +114,31 @@ public class SmslibService {
 		assert(producer != null);
 		producerRunning = false;
 		stopIfUnused();
+		producer = null;
 	}
 	
 	public synchronized void stopForConsumer() throws Exception {
 		assert(consumer != null);
 		consumerRunning = false;
 		stopIfUnused();
+		consumer = null;
+		receiveThread.join();
 	}
 
 	private synchronized void stopIfUnused() throws Exception {
-		if(cService.isConnected()
-				&& !producerRunning
-				&& !consumerRunning) {
-			cService.disconnect();
+		if(!producerRunning && !consumerRunning) {
+			if(cService.isConnected()) {
+				cService.disconnect();
+			}
+			cService = null;
 		}
 	}
 
 //> SEND/RECEIVE METHODS
 	private synchronized void startService() throws Exception {
+		if(cService == null) {
+			initCService();
+		}
 		if(!cService.isConnected()) {
 			cService.connect();
 		}
@@ -135,7 +165,9 @@ public class SmslibService {
 		}
 	}
 	
-	class ReceiveThread extends Thread {
+	public class ReceiveThread extends Thread {
+		private boolean finished;
+		
 		public void run() {
 			while(consumerRunning) {
 				try {
@@ -145,12 +177,17 @@ public class SmslibService {
 					e.printStackTrace();
 				}
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			finished = true;
+		}
+
+		public boolean isFinished() {
+			return finished;
 		}
 	}
 	
