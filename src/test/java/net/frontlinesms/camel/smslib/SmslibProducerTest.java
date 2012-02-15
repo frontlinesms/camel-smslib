@@ -1,10 +1,11 @@
 package net.frontlinesms.camel.smslib;
 
 import static org.mockito.Mockito.*;
+import org.mockito.ArgumentMatcher;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.camel.*;
+import org.junit.*;
+import org.smslib.COutgoingMessage;
 
 /** JUnit tests for {@link SmslibProducer} */
 public class SmslibProducerTest {
@@ -38,13 +39,35 @@ public class SmslibProducerTest {
 		verify(mockSmslibService).stopForProducer();
 	}
 	
-//	@Test
-//	public void testProcessing() throws Exception {
-//		Exchange sendMessageExchange = mock(Exchange.class);
-//		OutgoingSmslibCamelMessage message = mock(OutgoingSmslibCamelMessage.class);
-//		when(sendMessageExchange.getIn()).thenReturn(message);
-//
-//		p.process(sendMessageExchange);
-//		verify(mockSmslibService).send(message);
-//	}
+	@Test
+	public void testProcessing() throws Exception {
+		// given
+		COutgoingMessage smslibMessage = mock(COutgoingMessage.class);
+		Exchange sendMessageExchange = exchangeWithInBody(smslibMessage);
+		
+		// when
+		p.process(sendMessageExchange);
+		
+		// then
+		verify(mockSmslibService).send(messageWithBody(smslibMessage));
+	}
+	
+	private Exchange exchangeWithInBody(COutgoingMessage inBody) {
+		Message m = mock(Message.class);
+		when(m.getBody()).thenReturn(inBody);
+		
+		Exchange x = mock(Exchange.class);
+		when(x.getIn()).thenReturn(m);
+
+		return x;
+	}
+
+	private OutgoingSmslibCamelMessage messageWithBody(final COutgoingMessage m) {
+		return argThat(new ArgumentMatcher<OutgoingSmslibCamelMessage>() {
+			@Override
+			public boolean matches(Object argument) {
+				return ((OutgoingSmslibCamelMessage) argument).getBody() == m;
+			}
+		});
+	}
 }
