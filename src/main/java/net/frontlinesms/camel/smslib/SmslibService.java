@@ -6,6 +6,7 @@ import java.util.Map;
 import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 import org.smslib.CService;
+import org.smslib.NotConnectedException;
 import org.smslib.service.MessageClass;
 
 public class SmslibService {
@@ -133,6 +134,14 @@ public class SmslibService {
 			cService = null;
 		}
 	}
+	
+//> ERROR HANDLING
+	public synchronized void handleDeviceNotConnected(NotConnectedException ex) {
+		warn("Device not connected - trying to gracefully shutdown everything...!", ex);
+		if(consumer != null) {
+			consumer.getExceptionHandler().handleException(ex);
+		}
+	}
 
 //> SEND/RECEIVE METHODS
 	private synchronized void startService() throws Exception {
@@ -172,6 +181,8 @@ public class SmslibService {
 			while(consumerRunning) {
 				try {
 					doReceive();
+				} catch (NotConnectedException e) {
+					handleDeviceNotConnected(e);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -193,6 +204,19 @@ public class SmslibService {
 	
 //> LOGGING METHODS
 	private void warn(String message) {
-		System.out.println("WARN: " + message);
+		log("WARN", message);
+	}
+	
+	private void warn(String message, Exception ex) {
+		log("WARN", message, ex);
+	}
+	
+	private void log(String level, String message) {
+		System.out.println(level + ": " + message);
+	}
+	
+	private void log(String level, String message, Exception ex) {
+		log(level, message);
+		ex.printStackTrace();
 	}
 }

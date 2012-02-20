@@ -9,5 +9,8 @@ target/
 # IntelliJ/Netbeans project files
 camel-smslib.iml
 
-// vim temp files
+# vim temp files
 *~
+
+# redcar editor settings directory
+.redcar

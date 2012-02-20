@@ -8,6 +8,7 @@ import java.util.Map;
 
 import net.frontlinesms.camel.smslib.SmslibService.ReceiveThread;
 
+import org.apache.camel.spi.ExceptionHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.mockito.stubbing.Answer;
 import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
 import org.smslib.CService;
+import org.smslib.NotConnectedException;
 import org.smslib.service.MessageClass;
 
 import serial.mock.MockSerial;
@@ -464,6 +466,22 @@ public class SmslibServiceTest {
 		// then
 		assertNull(service.getProducer());
 		assertFalse(service.isProducerRunning());
+	}
+	
+	@Test
+	public void notConnectedExceptionShouldPropogateToExceptionHandler() throws Exception {
+		// given
+		ExceptionHandler mockExceptionHandler = mock(ExceptionHandler.class);
+		SmslibConsumer consumer = mockConsumer();
+		when(consumer.getExceptionHandler()).thenReturn(mockExceptionHandler);
+		service.setConsumer(consumer);
+		NotConnectedException notConnectedException = new NotConnectedException();
+		
+		// when
+		service.handleDeviceNotConnected(notConnectedException);
+		
+		// then
+		verify(mockExceptionHandler).handleException(notConnectedException);
 	}
 	
 //> TEST HELPER METHODS
