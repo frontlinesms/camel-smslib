@@ -13,7 +13,7 @@ public class SmslibService {
 	static { System.out.println("SmsLibService class loaded."); }
 	
 	private CService cService;
-	
+
 	private SmslibProducer producer;
 	private SmslibConsumer consumer;
 	
@@ -21,7 +21,7 @@ public class SmslibService {
 	private boolean producerRunning;
 	
 	private MessageClass receiveMessageClass = MessageClass.ALL;
-	
+
 	private final CServiceFactory cServiceFactory;
 	private final String uri;
 	private final String remaining;
@@ -134,14 +134,6 @@ public class SmslibService {
 			cService = null;
 		}
 	}
-	
-//> ERROR HANDLING
-	public synchronized void handleDeviceNotConnected(NotConnectedException ex) {
-		warn("Device not connected - trying to gracefully shutdown everything...!", ex);
-		if(consumer != null) {
-			consumer.getExceptionHandler().handleException(ex);
-		}
-	}
 
 //> SEND/RECEIVE METHODS
 	private synchronized void startService() throws Exception {
@@ -162,15 +154,20 @@ public class SmslibService {
 	}
 
 	public void doReceive() throws Exception {
-		LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
-		this.cService.readMessages(messageList, receiveMessageClass);
-		for(CIncomingMessage m : messageList) {
-			this.consumer.accept(new IncomingSmslibCamelMessage(m));
-			// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
-			// not desired and this behaviour should not be forced
-			System.out.println("Deleting message...");
-			this.cService.deleteMessage(m);
-			System.out.println("Message deleted.");
+		try {
+			LinkedList<CIncomingMessage> messageList = new LinkedList<CIncomingMessage>();
+			this.cService.readMessages(messageList, receiveMessageClass);
+			for(CIncomingMessage m : messageList) {
+				this.consumer.accept(new IncomingSmslibCamelMessage(m));
+				// TODO deletion should be done in markRead() method in suitable class - sometimes deletion is
+				// not desired and this behaviour should not be forced
+				System.out.println("Deleting message...");
+				this.cService.deleteMessage(m);
+				System.out.println("Message deleted.");
+			}
+		} catch(NotConnectedException e) {
+			System.out.println("SmslibService.doReceive() : NotConnectedException caught");
+			this.consumer.handleDisconnection(e);
 		}
 	}
 	
@@ -181,8 +178,6 @@ public class SmslibService {
 			while(consumerRunning) {
 				try {
 					doReceive();
-				} catch (NotConnectedException e) {
-					handleDeviceNotConnected(e);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -207,16 +202,7 @@ public class SmslibService {
 		log("WARN", message);
 	}
 	
-	private void warn(String message, Exception ex) {
-		log("WARN", message, ex);
-	}
-	
 	private void log(String level, String message) {
 		System.out.println(level + ": " + message);
-	}
-	
-	private void log(String level, String message, Exception ex) {
-		log(level, message);
-		ex.printStackTrace();
 	}
 }

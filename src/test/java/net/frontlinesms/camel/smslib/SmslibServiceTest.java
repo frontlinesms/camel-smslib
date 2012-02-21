@@ -471,17 +471,19 @@ public class SmslibServiceTest {
 	@Test
 	public void notConnectedExceptionShouldPropogateToExceptionHandler() throws Exception {
 		// given
-		ExceptionHandler mockExceptionHandler = mock(ExceptionHandler.class);
 		SmslibConsumer consumer = mockConsumer();
-		when(consumer.getExceptionHandler()).thenReturn(mockExceptionHandler);
 		service.setConsumer(consumer);
 		NotConnectedException notConnectedException = new NotConnectedException();
+		doThrow(notConnectedException)
+				.when(cServiceMock)
+				.readMessages(any(LinkedList.class), any(MessageClass.class));
+		inject(service, "cService", cServiceMock);
 		
 		// when
-		service.handleDeviceNotConnected(notConnectedException);
+		service.doReceive();
 		
 		// then
-		verify(mockExceptionHandler).handleException(notConnectedException);
+		verify(consumer).handleDisconnection(notConnectedException);
 	}
 	
 //> TEST HELPER METHODS

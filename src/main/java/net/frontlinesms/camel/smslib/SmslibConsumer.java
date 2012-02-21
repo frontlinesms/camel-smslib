@@ -6,6 +6,7 @@ package net.frontlinesms.camel.smslib;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
+import org.smslib.NotConnectedException;
 
 /**
  * TODO this should be an idempotent consumer (https://camel.apache.org/idempotent-consumer.html) to swallow any repeated messages
@@ -36,12 +37,27 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceProd
 	public void accept(IncomingSmslibCamelMessage message) {
 		Exchange exchange = getEndpoint().createExchange();
 		exchange.setIn(message);
-		Processor processor = this.getProcessor();
-		
+		process(exchange);
+	}
+	
+	public void handleDisconnection(NotConnectedException ex) {
+		System.out.println("SmslibConsumer.handleDisconnection() : ENTRY");
+		Exchange exchange = getEndpoint().createExchange();
+		exchange.setException(ex);
+		process(exchange);
+		System.out.println("SmslibConsumer.handleDisconnection() : EXIT");
+	}
+	
+	private void process(Exchange x) {
+		System.out.println("SmslibConsumer.process() : ENTRY");
 		try {
-			processor.process(exchange);
+			System.out.println("SmslibConsumer.process() : calling processor.process()...");
+			getProcessor().process(x);
+			System.out.println("SmslibConsumer.process() : processor.process() called.");
 		} catch(Exception e) {
-			getExceptionHandler().handleException("Exception thrown when calling processor.process()", exchange, e);
+			System.out.println("SmslibConsumer.process() : Exception thrown when calling processor.process()");
+			getExceptionHandler().handleException("Exception thrown when calling processor.process()", x, e);
 		}
+		System.out.println("SmslibConsumer.process() : EXIT");
 	}
 }

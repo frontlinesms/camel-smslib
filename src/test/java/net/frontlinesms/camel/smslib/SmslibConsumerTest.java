@@ -7,6 +7,7 @@ import org.apache.camel.Processor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.smslib.NotConnectedException;
 
 public class SmslibConsumerTest {
 	Processor mockProcessor;
@@ -60,6 +61,20 @@ public class SmslibConsumerTest {
 		
 		// then
 		verify(exchange).setIn(message);
+		verify(mockProcessor).process(exchange);
+	}
+	
+	public void testHandleDisconnection() throws Exception {
+		// given
+		NotConnectedException exception = mock(NotConnectedException.class);
+		Exchange exchange = mock(Exchange.class);
+		when(mockEndpoint.createExchange()).thenReturn(exchange);
+		
+		// when
+		c.handleDisconnection(exception);
+		
+		// then
+		verify(exchange).setException(exception);
 		verify(mockProcessor).process(exchange);
 	}
 }
