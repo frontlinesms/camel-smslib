@@ -17,7 +17,13 @@ class CServiceFactory {
 				getString(params, "manufacturer"),
 				getString(params, "model"),
 				getString(params, "handler"));
-		cService.setSimPin(getPin(params));
+		
+		String pin = getPin(params);
+		if(pin!=null) cService.setSimPin(pin);
+		
+		String smscNumber = getSmscNumber(params);
+		if(smscNumber!=null) cService.setSmscNumber(smscNumber);
+		
 		cService.setAsyncRecvClass(getBoolean(params, "allMessages")? MessageClass.ALL: MessageClass.UNREAD);
 		return cService;
 	}
@@ -34,6 +40,11 @@ class CServiceFactory {
 	private String getPin(Map<String, Object> params) {
 		String pin = getString(params, "pin");
 		return pin.length() > 0? pin: null;
+	}
+	
+	private String getSmscNumber(Map<String, Object> params) {
+		String smsc = getString(params, "smscNumber");
+		return smsc.length() > 0? smsc: null;
 	}
 
 	private int getBaud(Map<String, Object> parameters) {

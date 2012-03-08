@@ -9,6 +9,8 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,11 +58,145 @@ public class CServiceFactoryTest {
 				"baud", "9600",
 				"manufacturer", "Nokia",
 				"model", "1200",
+				"handler", "Nokia_S40_3ed"));
+		
+		// then
+		verifyNew(CService.class).withArguments("COM1", 9600, "Nokia", "1200", "Nokia_S40_3ed");
+	}
+	
+	@Test
+	public void emptySmscNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed",
+				"smscNumber", ""));
+		
+		// then
+		verify(mockCService, never()).setSmscNumber(anyString());
+	}
+	
+	@Test
+	public void nullSmscNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed",
+				"smscNumber", null));
+		
+		// then
+		verify(mockCService, never()).setSmscNumber(anyString());
+	}
+	
+	@Test
+	public void unsetSmscNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed"));
+		
+		// then
+		verify(mockCService, never()).setSmscNumber(anyString());
+	}
+	
+	@Test
+	public void smscNumberShouldBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed",
+				"pin", null,
+				"smscNumber", "+1234567890"));
+		
+		// then
+		verify(mockCService).setSmscNumber("+1234567890");
+	}
+	
+	@Test
+	public void nullPinNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
 				"handler", "Nokia_S40_3ed",
 				"pin", null));
 		
 		// then
-		verifyNew(CService.class).withArguments("COM1", 9600, "Nokia", "1200", "Nokia_S40_3ed");
+		verify(mockCService, never()).setSimPin(anyString());
+	}
+	
+	@Test
+	public void blankPinNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed",
+				"pin", ""));
+		
+		// then
+		verify(mockCService, never()).setSimPin(anyString());
+	}
+	
+	@Test
+	public void unsetPinNumberShouldNotBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed"));
+		
+		// then
+		verify(mockCService, never()).setSimPin(anyString());
+	}
+	
+	@Test
+	public void pinNumberShouldBePassed() throws Exception {
+		// when
+		CService mockCService = mock(CService.class);
+		whenNew(CService.class).withArguments(anyString(), anyInt(),
+				anyString(), anyString(), anyString()).thenReturn(mockCService);
+		factory.create("smslib://COM1", "COM1", new ParameterMap(
+				"baud", "9600",
+				"manufacturer", "Nokia",
+				"model", "1200",
+				"handler", "Nokia_S40_3ed",
+				"pin", "1234"));
+		
+		// then
+		verify(mockCService).setSimPin("1234");
 	}
 }
 
