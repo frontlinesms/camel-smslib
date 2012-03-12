@@ -8,7 +8,7 @@
   <artifactId>camel-smslib</artifactId>
   <name>Camel :: SMSLib</name>
   <description>Camel SMSLib support</description>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.3</version>
   
 	<scm>
 		<connection>scm:git://github.com/${github.projectOwner}/${github.projectName}.git</connection>
