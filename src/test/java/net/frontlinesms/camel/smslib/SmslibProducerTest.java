@@ -36,7 +36,7 @@ public class SmslibProducerTest {
 	@Test
 	public void testDoStopShouldStopService() throws Exception {
 		p.stop();
-		verify(mockSmslibService).stopForProducer();
+		verify(mockSmslibService).stopForProducer(p);
 	}
 	
 	@Test

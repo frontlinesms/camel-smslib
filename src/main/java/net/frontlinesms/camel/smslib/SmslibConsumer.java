@@ -31,7 +31,7 @@ public class SmslibConsumer extends DefaultConsumer implements SmslibServiceProd
 	@Override
 	public void stop() throws Exception {
 		super.stop();
-		this.smslibService.stopForConsumer();
+		this.smslibService.stopForConsumer(this);
 	}
 	
 	public void accept(IncomingSmslibCamelMessage message) {

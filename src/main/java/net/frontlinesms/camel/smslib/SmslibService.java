@@ -45,7 +45,7 @@ public class SmslibService {
 		}
 	}
 	
-	private void initCService() {
+	private synchronized void initCService() {
 		this.cService = cServiceFactory.create(uri, remaining, parameters);
 	}
 	
@@ -101,8 +101,8 @@ public class SmslibService {
 
 	public synchronized void startForProducer() throws Exception {
 		assert(producer != null);
+		producerRunning = true;
 		try {
-			producerRunning = true;
 			startService();
 		} catch(Exception ex) {
 			producerRunning = false;
@@ -111,24 +111,27 @@ public class SmslibService {
 		}
 	}
 	
-	public synchronized void stopForProducer() throws Exception {
-		assert(producer != null);
-		producerRunning = false;
-		stopIfUnused();
-		producer = null;
+	public synchronized void stopForProducer(SmslibProducer p) throws Exception {
+		if(producer == p) {
+			producerRunning = false;
+			stopIfUnused();
+			producer = null;
+		}
 	}
 	
-	public synchronized void stopForConsumer() throws Exception {
-		assert(consumer != null);
-		consumerRunning = false;
-		stopIfUnused();
-		consumer = null;
-		receiveThread.join();
+	public synchronized void stopForConsumer(SmslibConsumer c) throws Exception {
+		if(consumer == c) {
+			consumerRunning = false;
+			stopIfUnused();
+			consumer = null;
+			receiveThread.join();
+			receiveThread = null;
+		}
 	}
 
 	private synchronized void stopIfUnused() throws Exception {
 		if(!producerRunning && !consumerRunning) {
-			if(cService.isConnected()) {
+			if(cService!=null && cService.isConnected()) {
 				cService.disconnect();
 			}
 			cService = null;

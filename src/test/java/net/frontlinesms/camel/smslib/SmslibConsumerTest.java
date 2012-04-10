@@ -46,7 +46,7 @@ public class SmslibConsumerTest {
 		c.stop();
 		
 		// then
-		verify(mockSmslibService).stopForConsumer();
+		verify(mockSmslibService).stopForConsumer(c);
 	}
 	
 	@Test

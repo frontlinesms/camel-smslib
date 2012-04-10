@@ -126,9 +126,10 @@ public class SmslibServiceTest {
 	@Test
 	public void startingProducerAfterCserviceDiscardShouldCreateNewCservice() throws Exception {
 		// given
-		service.setProducer(mockProducer());
+		SmslibProducer mockProducer = mockProducer();
+		service.setProducer(mockProducer);
 		service.startForProducer();
-		service.stopForProducer();
+		service.stopForProducer(mockProducer);
 		
 		// when
 		service.setProducer(mockProducer());
@@ -142,9 +143,10 @@ public class SmslibServiceTest {
 	@Test
 	public void settingConsumerAfterCserviceDiscardShouldCreateNewCservice() throws Exception {
 		// given
-		service.setConsumer(mockConsumer());
+		SmslibConsumer mockConsumer = mockConsumer();
+		service.setConsumer(mockConsumer);
 		service.startForConsumer();
-		service.stopForConsumer();
+		service.stopForConsumer(mockConsumer);
 		
 		// when
 		service.setConsumer(mockConsumer());
@@ -171,13 +173,14 @@ public class SmslibServiceTest {
 	@Test
 	public void stoppingConsumerShouldStopReceiveThread() throws Exception {
 		// given
-		service.setConsumer(mockConsumer());
+		SmslibConsumer mockConsumer = mockConsumer();
+		service.setConsumer(mockConsumer);
 		service.startForConsumer();
 		ReceiveThread receiveThread = service.getReceiveThread();
 		assertFalse(receiveThread.isFinished());
 		
 		// when
-		service.stopForConsumer();
+		service.stopForConsumer(mockConsumer);
 		
 		// then
 		assertTrue(receiveThread.isFinished());
@@ -185,11 +188,12 @@ public class SmslibServiceTest {
 	
 	public void stoppingConsumerShouldDiscardOldReceiveThread() throws Exception {
 		// given
-		service.setConsumer(mockConsumer());
+		SmslibConsumer mockConsumer = mockConsumer();
+		service.setConsumer(mockConsumer);
 		service.startForConsumer();
 		
 		// when
-		service.stopForConsumer();
+		service.stopForConsumer(mockConsumer);
 		
 		// then
 		assertNull(service.getReceiveThread());
@@ -203,11 +207,12 @@ public class SmslibServiceTest {
 	@Test
 	public void stoppingForConsumerShouldDiscardTheConsumer() throws Exception {
 		// given
-		service.setConsumer(mockConsumer());
+		SmslibConsumer mockConsumer = mockConsumer();
+		service.setConsumer(mockConsumer);
 		service.startForConsumer();
 		
 		// when
-		service.stopForConsumer();
+		service.stopForConsumer(mockConsumer);
 		
 		// then
 		assertNull(service.getConsumer());
@@ -216,11 +221,12 @@ public class SmslibServiceTest {
 	@Test
 	public void stoppingForProducerShouldDiscardTheProducer() throws Exception {
 		// given
-		service.setProducer(mockProducer());
+		SmslibProducer mockProducer = mockProducer();
+		service.setProducer(mockProducer);
 		service.startForProducer();
 		
 		// when
-		service.stopForProducer();
+		service.stopForProducer(mockProducer);
 		
 		// then
 		assertNull(service.getProducer());
@@ -256,12 +262,13 @@ public class SmslibServiceTest {
 	@Test
 	public void whenProducerAndConsumerBothStoppedCserviceShouldDisconnect() throws Exception {
 		// given
-		service.setProducer(mockProducer());
+		SmslibProducer mockProducer = mockProducer();
+		service.setProducer(mockProducer);
 		when(cServiceMock.isConnected()).thenReturn(true);
 		service.startForProducer();
 		
 		// when
-		service.stopForProducer();
+		service.stopForProducer(mockProducer);
 		
 		// verify
 		verify(cServiceMock).disconnect();
@@ -270,12 +277,13 @@ public class SmslibServiceTest {
 	@Test
 	public void whenProducerAndConsumerBothStoppedCserviceShouldBeDiscarded() throws Exception {
 		// given
-		service.setProducer(mockProducer());
+		SmslibProducer mockProducer = mockProducer();
+		service.setProducer(mockProducer);
 		when(cServiceMock.isConnected()).thenReturn(true);
 		service.startForProducer();
 		
 		// when
-		service.stopForProducer();
+		service.stopForProducer(mockProducer);
 		
 		// then
 		assertNull(service.getCService());
@@ -284,14 +292,15 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceNoStopIfOtherUsers() throws Exception {
 		// given
-		service.setProducer(mockProducer());
+		SmslibProducer mockProducer = mockProducer();
+		service.setProducer(mockProducer);
 		service.startForProducer();
 		service.setConsumer(mockConsumer());
 		service.startForConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
-		service.stopForProducer();
+		service.stopForProducer(mockProducer);
 		
 		// verify
 		verify(cServiceMock, never()).disconnect();
@@ -300,16 +309,16 @@ public class SmslibServiceTest {
 	@Test
 	public void testCServiceStopIfNoMoreUsers() throws Exception {
 		// given		
-		setupAndStartProducer();
-		setupAndStartConsumer();
+		SmslibProducer producer = setupAndStartProducer();
+		SmslibConsumer consumer = setupAndStartConsumer();
 		when(cServiceMock.isConnected()).thenReturn(true);
 		
 		// when
-		service.stopForProducer();
+		service.stopForProducer(producer);
 		verify(cServiceMock, never()).disconnect();
 		
 		// and
-		service.stopForConsumer();
+		service.stopForConsumer(consumer);
 		
 		// verify
 		verify(cServiceMock).disconnect();
@@ -495,9 +504,11 @@ public class SmslibServiceTest {
 		return mock(SmslibConsumer.class);
 	}
 	
-	private void setupAndStartProducer() throws Exception {
-		service.setProducer(mockProducer());
+	private SmslibProducer setupAndStartProducer() throws Exception {
+		SmslibProducer producer = mockProducer();
+		service.setProducer(producer);
 		service.startForProducer();
+		return producer;
 	}
 	
 	private SmslibConsumer setupAndStartConsumer() throws Exception {

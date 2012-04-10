@@ -33,6 +33,6 @@ class SmslibProducer extends DefaultProducer implements SmslibServiceProducer {
 	@Override
 	public void doStop() throws Exception {
 		super.doStop();
-		this.smslibService.stopForProducer();
+		this.smslibService.stopForProducer(this);
 	}
 }

@@ -32,6 +32,10 @@
 	</distributionManagement>
 
 	<properties>
+		<!-- Force Maven to use UTF-8 encoding when copying resources, rather than using the 
+			platform default. -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<camel.version>2.5.0</camel.version>
 		<camel.osgi.export.pkg>net.frontlinesms.camel.smslib.*</camel.osgi.export.pkg>
 		<powermock.version>1.4.9</powermock.version>
@@ -56,6 +60,17 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
 				<executions>
 					<execution>
 						<goals>
