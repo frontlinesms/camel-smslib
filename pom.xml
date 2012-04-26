@@ -36,7 +36,7 @@
 			platform default. -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<camel.version>2.5.0</camel.version>
+		<camel.version>2.9.2</camel.version>
 		<camel.osgi.export.pkg>net.frontlinesms.camel.smslib.*</camel.osgi.export.pkg>
 		<powermock.version>1.4.9</powermock.version>
 
