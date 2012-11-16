@@ -2,6 +2,7 @@ package net.frontlinesms.camel.smslib;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Date;
 
 import org.smslib.CIncomingMessage;
 import org.smslib.COutgoingMessage;
@@ -154,6 +155,7 @@ public class SmslibService {
 		if(cMess.getRefNo() < 0) {
 			throw new MessageRejectedException(cMess);
 		}
+		System.out.println("#vaneyck# SmslibService.send() "+(new Date().toString()));
 	}
 
 	public void doReceive() throws Exception {
