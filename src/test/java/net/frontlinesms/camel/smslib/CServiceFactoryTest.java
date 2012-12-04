@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
@@ -42,18 +43,18 @@ public class CServiceFactoryTest {
 	public void testDefaultParameterValues() throws Exception {
 		// when
 		whenNew(CService.class).withArguments("COM1", 57600,
-				"", "", "").thenReturn(mock(CService.class));
+				"", "", "", true).thenReturn(mock(CService.class));
 		factory.create("smslib://COM1", "COM1", NO_PARAMS);
 		
 		// then
-		verifyNew(CService.class).withArguments("COM1", 57600, "", "", "");
+		verifyNew(CService.class).withArguments("COM1", 57600, "", "", "", true);
 	}
 	
 	@Test
 	public void testParameterPassing() throws Exception {
 		// when
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mock(CService.class));
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mock(CService.class));
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -61,7 +62,7 @@ public class CServiceFactoryTest {
 				"handler", "Nokia_S40_3ed"));
 		
 		// then
-		verifyNew(CService.class).withArguments("COM1", 9600, "Nokia", "1200", "Nokia_S40_3ed");
+		verifyNew(CService.class).withArguments("COM1", 9600, "Nokia", "1200", "Nokia_S40_3ed", true);
 	}
 	
 	@Test
@@ -69,7 +70,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -86,7 +87,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -103,7 +104,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -119,7 +120,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -137,7 +138,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -154,7 +155,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -171,7 +172,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",
@@ -187,7 +188,7 @@ public class CServiceFactoryTest {
 		// when
 		CService mockCService = mock(CService.class);
 		whenNew(CService.class).withArguments(anyString(), anyInt(),
-				anyString(), anyString(), anyString()).thenReturn(mockCService);
+				anyString(), anyString(), anyString(), anyBoolean()).thenReturn(mockCService);
 		factory.create("smslib://COM1", "COM1", new ParameterMap(
 				"baud", "9600",
 				"manufacturer", "Nokia",

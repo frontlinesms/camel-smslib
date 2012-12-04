@@ -142,7 +142,7 @@
     <dependency>
       <groupId>net.frontlinesms.core</groupId>
       <artifactId>smslib</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.5</version>
     </dependency>
     <dependency>
       <groupId>net.frontlinesms.core</groupId>

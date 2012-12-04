@@ -16,7 +16,8 @@ class CServiceFactory {
 				getBaud(params),
 				getString(params, "manufacturer"),
 				getString(params, "model"),
-				getString(params, "handler"));
+				getString(params, "handler"),
+				true);
 		
 		String pin = getPin(params);
 		if(pin!=null) cService.setSimPin(pin);
